@@ -14,8 +14,8 @@
 ### Software algorithms
 
 In order to achieve high success rates in uncontrolled environments efficient and reliable software algorithms have to be implemented. This project will consist of two such major software modules.
-#### 1. MSER for blob detection
-Instead of localizing the number plate first, MSER ( Maximally Stable Extremal Regions) technique can directly identify letters in a given frame. In contrast to traditional methods, MSER doesn't localize the license plate first which will be a difficult task under low lighting conditions. Instead it directly localizes the characters on a given frame, but doesn't identify them.
+#### 1. Plate Localization
+Object detection algorithm has to be implemented in order to identify the number plate area of the image. Recurrent Convolutional Neural Network algorithms can be used efficiently for this.
 #### 2. OCR
 The localized characters needs to be identified and this will be done using OCR ( Optical Charact Recognition) algorithms.
 
@@ -34,3 +34,7 @@ High quality cameras are used to gather the video stream and transfer it to a co
 2. W. Wang, Q. Jiang, X. Zhou and W. Wan, "Car license plate detection based on MSER," 2011 International Conference on Consumer Electronics, Communications and Networks (CECNet), 2011, pp. 3973-3976, doi: 10.1109/CECNET.2011.5768335.
 
 3. Islam, Md & Mondal, Chayan & Azam, Md & Islam, Abu. (2016). Text detection and recognition using enhanced MSER detection and a novel OCR technique. 15-20. 10.1109/ICIEV.2016.7760054. 
+
+4. Jiuxiang Gu, Zhenhua Wang, Jason Kuen, Lianyang Ma, Amir Shahroudy, Bing Shuai, Ting Liu, Xingxing Wang, Gang Wang, Jianfei Cai, Tsuhan Chen,
+Recent advances in convolutional neural networks,
+Pattern Recognition,
