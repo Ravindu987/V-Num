@@ -109,7 +109,7 @@ def unet(pretrained_weights = None,input_size = (512,512,1)):
 model=unet()
 
 image_list=os.listdir('./PageSegData/PageImg/')
-image_list=[filename.split(".")[0]for filename in image_list]
+image_list=[filename.split(".")[0] for filename in image_list]
 
 file_train = image_list[0:int(0.75*len(image_list))]
 file_test = image_list[int(0.75*len(image_list)):]
