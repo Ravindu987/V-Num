@@ -49,12 +49,16 @@ def preprocess_img(img, imgSize):
                max(min(ht, int(h / f)), 1))  # scale according to f (result at least 1 and at most wt or ht)
     # INTER_CUBIC interpolation best approximate the pixels image
     img = cv2.resize(img, newSize, interpolation=cv2.INTER_CUBIC)
+    # cv2.imshow("test2", img)
     # see this https://stackoverflow.com/a/57503843/7338066
     most_freq_pixel = find_dominant_color(Image.fromarray(img))
+    # cv2.imshow("test3", img)
     target = np.ones([ht, wt]) * most_freq_pixel
     target[0:newSize[1], 0:newSize[0]] = img
+    # cv2.imshow("test4", img)
 
     img = target
+    # cv2.imshow("test5", img)
 
     return img
 
@@ -105,18 +109,29 @@ images = []
 imagenames = []
 txts = []
 
-for i in range(10):
-    filename, txt = annot[i].split(',')[0], annot[i].split(',')[
-        1].split('\n')[0]
-    imagenames.append(filename)
-    txts.append(txt)
+# for i in range(10):
+#     filename, txt = annot[i].split(',')[0], annot[i].split(',')[
+#         1].split('\n')[0]
+#     imagenames.append(filename)
+#     txts.append(txt)
 
-    img = cv2.imread("./wordimages/"+filename, 0)
+#     img = cv2.imread("./wordimages/"+filename, 0)
+#     img = preprocess_img(img, (128, 32))
+#     img = np.expand_dims(img, axis=-1)
+#     img = img/255
+#     images.append(img)
+
+for filename in os.listdir('./Sample_DataSet'):
+    txts.append(filename)
+    img = cv2.imread("./Sample_DataSet/"+filename, 0)
+    # cv2.imshow("Test", img)
     img = preprocess_img(img, (128, 32))
-    print(type(img))
+    # cv2.imshow("Image", img)
     img = np.expand_dims(img, axis=-1)
     img = img/255
     images.append(img)
+
+    cv2.waitKey(0)
 
 
 act_model.load_weights("./Trained Weights/best_model.hdf5")
