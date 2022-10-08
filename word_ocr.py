@@ -16,10 +16,6 @@ import random
 import matplotlib.pyplot as plt
 from PIL import Image
 from sklearn.utils import shuffle
-# import tensorflow as tf
-# physical_devices = tf.config.experimental.list_physical_devices('GPU')
-# if len(physical_devices) > 0:
-#     tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 char_list = string.ascii_letters+string.digits
 
@@ -111,7 +107,7 @@ imagenames, txts = zip(*c)
 
 for i in range(len(imagenames)):
     img = cv2.imread(
-        './images/'+imagenames[i], 0)
+        './wordimages/'+imagenames[i], 0)
 
     img = preprocess_img(img, (128, 32))
     img = np.expand_dims(img, axis=-1)
@@ -228,7 +224,7 @@ valid_input_length = np.array(valid_input_length)
 valid_label_length = np.array(valid_label_length)
 
 print(model.summary())
-batch_size = 1
+batch_size = 64
 epochs = 15
 model.fit(x=[training_img, train_padded_txt, train_input_length, train_label_length],
           y=np.zeros(len(training_img)),
