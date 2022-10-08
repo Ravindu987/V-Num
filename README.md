@@ -17,7 +17,10 @@ In order to achieve high success rates in uncontrolled environments efficient an
 #### 1. Plate Localization
 Object detection algorithm has to be implemented in order to identify the number plate area of the image. Recurrent Convolutional Neural Network algorithms can be used efficiently for this.
 #### 2. OCR
-The localized characters needs to be identified and this will be done using OCR ( Optical Charact Recognition) algorithms. For this purpose I have currently implemented a CRNN model which consists of convolutional layers followed by LSTM layers which combined can etxract information from the image. A CTC layer is used for prediction.
+The localized characters needs to be identified and this will be done using OCR ( Optical Charact Recognition) algorithms. For this purpose I have currently implemented a CRNN model which consists of convolutional layers followed by LSTM RNN layers which combined can etxract information from the image. 
+- CNN is used to extract features from the image
+- RNN (LSTM) to predict characters
+Finally a CTC layer is used for prediction.
 
 ### Hardware Modules
 
