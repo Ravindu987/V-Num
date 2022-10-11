@@ -20,7 +20,7 @@ Object detection algorithm has to be implemented in order to identify the number
 The localized characters needs to be identified and this will be done using OCR ( Optical Character Recognition) algorithms. For this purpose I have currently implemented a CRNN model which consists of convolutional layers followed by LSTM RNN layers which combined can etxract information from the image. 
 - CNN is used to extract features from the image
 - RNN (LSTM) to predict characters
-Finally a CTC layer is used for the classification.
+- Finally a CTC layer is used for the classification.
 
 ### Hardware Modules
 
