@@ -9,17 +9,6 @@ from keras.callbacks import ModelCheckpoint
 import random
 
 
-def visualize(img, seg_img):
-    plt.figure(figsize=(20, 20))
-    plt.subplot(1, 2, 1)
-    plt.imshow(img)
-    plt.title('Image')
-    plt.subplot(1, 2, 2)
-    plt.imshow(seg_img, cmap='gray')
-    plt.title('Segmented Image')
-    plt.show()
-
-
 def get_segmented_img(img, n_classes):
     seg_labels = np.zeros((512, 512, 1))
     img = cv2.resize(img, (512, 512))

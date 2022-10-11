@@ -8,7 +8,6 @@ from keras.layers import Dense, LSTM, Reshape, BatchNormalization, Input, Conv2D
 from keras.models import Model
 from keras.activations import relu, sigmoid, softmax
 import keras.backend as K
-from keras.utils import to_categorical
 from keras.callbacks import ModelCheckpoint
 import os
 import tensorflow as tf
@@ -108,7 +107,7 @@ imagenames, txts = zip(*c)
 for i in range(len(imagenames)):
     img = cv2.imread(
         './wordimages/'+imagenames[i], 0)
-
+    print(i)
     img = preprocess_img(img, (128, 32))
     img = np.expand_dims(img, axis=-1)
     img = img/255.
