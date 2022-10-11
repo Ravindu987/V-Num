@@ -20,7 +20,7 @@ Object detection algorithm has to be implemented in order to identify the number
 The localized characters needs to be identified and this will be done using OCR ( Optical Charact Recognition) algorithms. For this purpose I have currently implemented a CRNN model which consists of convolutional layers followed by LSTM RNN layers which combined can etxract information from the image. 
 - CNN is used to extract features from the image
 - RNN (LSTM) to predict characters
-Finally a CTC layer is used for prediction.
+Finally a CTC layer is used for the classification.
 
 ### Hardware Modules
 
@@ -29,18 +29,22 @@ The sequent processing will be done using a computer with a CUDA enabled GTX 165
 
 The training of CNN models will be done using a computer with a CUDA enabled RTX 2080 graphics processing unit for time efficiency.
 
+By enabling CUDA, I was able to reduce the training time by a factor of 6 on GTX 1650 and 12 on RTX 2080.
+
 ### Timeline
 
-![V-Num timeline](https://user-images.githubusercontent.com/80534358/191070849-5564ed50-0b47-43e5-802b-36cc15e1a764.jpg)
+![Timline_OCT_11](https://user-images.githubusercontent.com/80534358/195003300-9e98222d-2b3f-4397-a92d-bfb7c6ac8d3e.jpg)
 
 ### References
 
 1. Kang, Dong. (2009). Dynamic programming-based method for extraction of license plate numbers of speeding vehicles on the highway. International Journal of Automotive Technology. 10. 205-210. 10.1007/s12239-009-0024-2. 
 
-2. W. Wang, Q. Jiang, X. Zhou and W. Wan, "Car license plate detection based on MSER," 2011 International Conference on Consumer Electronics, Communications and Networks (CECNet), 2011, pp. 3973-3976, doi: 10.1109/CECNET.2011.5768335.
+2. Drobac, Senka; LindÃ©n, Krister (2020). Optical character recognition with neural networks and post-correction with finite state methods. International Journal on Document Analysis and Recognition (IJDAR), (), –. doi:10.1007/s10032-020-00359-9 
 
-3. Islam, Md & Mondal, Chayan & Azam, Md & Islam, Abu. (2016). Text detection and recognition using enhanced MSER detection and a novel OCR technique. 15-20. 10.1109/ICIEV.2016.7760054. 
+3. Graves, Alex & Fernández, Santiago & Gomez, Faustino & Schmidhuber, Jürgen. (2006). Connectionist temporal classification: Labelling unsegmented sequence data with recurrent neural 'networks. ICML 2006 - Proceedings of the 23rd International Conference on Machine Learning. 2006. 369-376. 10.1145/1143844.1143891. 
 
-4. Jiuxiang Gu, Zhenhua Wang, Jason Kuen, Lianyang Ma, Amir Shahroudy, Bing Shuai, Ting Liu, Xingxing Wang, Gang Wang, Jianfei Cai, Tsuhan Chen,
+4. Wick, Christoph & Reul, Christian & Puppe, Frank. (2018). Calamari - A High-Performance Tensorflow-based Deep Learning Package for Optical Character Recognition
+
+5. Jiuxiang Gu, Zhenhua Wang, Jason Kuen, Lianyang Ma, Amir Shahroudy, Bing Shuai, Ting Liu, Xingxing Wang, Gang Wang, Jianfei Cai, Tsuhan Chen,
 Recent advances in convolutional neural networks,
 Pattern Recognition,
