@@ -33,7 +33,7 @@ By enabling CUDA, I was able to reduce the training time by a factor of 6 on GTX
 
 ### Timeline
 
-![V-Num timeline](https://user-images.githubusercontent.com/80534358/191070849-5564ed50-0b47-43e5-802b-36cc15e1a764.jpg)
+![Timline_OCT_11](https://user-images.githubusercontent.com/80534358/195003300-9e98222d-2b3f-4397-a92d-bfb7c6ac8d3e.jpg)
 
 ### References
 
