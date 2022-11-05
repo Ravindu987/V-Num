@@ -1,8 +1,6 @@
-import fnmatch
 import cv2
 import numpy as np
 import string
-import time
 from keras_preprocessing.sequence import pad_sequences
 from keras.layers import Dense, LSTM, Reshape, BatchNormalization, Input, Conv2D, MaxPool2D, Lambda, Bidirectional
 from keras.models import Model
@@ -45,7 +43,6 @@ def find_dominant_color(image):
 
 
 def preprocess_img(img, imgSize):
-    "put img into target img of size imgSize and normalize gray-values"
 
     # In case of black images with no text just use black image instead.
     if img is None:

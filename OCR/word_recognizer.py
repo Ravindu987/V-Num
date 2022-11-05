@@ -124,7 +124,7 @@ txts = []
 for filename in os.listdir('./Sample_DataSet'):
     txts.append(filename)
     img = cv2.imread("./Sample_DataSet/"+filename, 0)
-    # cv2.imshow("Test", img)
+    cv2.imshow("Test", img)
     img = preprocess_img(img, (128, 32))
     # cv2.imshow("Image", img)
     img = np.expand_dims(img, axis=-1)

@@ -1,12 +1,9 @@
-Photos
 PageSegData
-weights00000001.h5
-weights00000002.h5
-weights00000003.h5
-images
-Masked Photos
-wordimages
-Trained Weights
+OCR Trained Weights
 DataSet
 Sample_DataSet
-tempCodeRunnerFile.py
+Cropped
+YOLO predict/yolov3-train_final.weights
+YOLO Trained Weights
+YOLO train data
+OCR train data
