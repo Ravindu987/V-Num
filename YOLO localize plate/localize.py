@@ -2,15 +2,12 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import glob
-import os
 
 
 class LicensePlateDetector:
-    def __init__(self, pth_weights: str, pth_cfg: str, pth_classes: str):
+    def __init__(self, pth_weights: str, pth_cfg: str):
         self.net = cv2.dnn.readNet(pth_weights, pth_cfg)
-        self.classes = []
-        with open(pth_classes, 'r') as f:
-            self.classes = f.read().splitlines()
+        self.classes = ["license-plate"]
         self.font = cv2.FONT_HERSHEY_PLAIN
         self.color = (255, 0, 0)
         self.coordinates = None
@@ -58,7 +55,7 @@ class LicensePlateDetector:
                 confidence = str(round(confidences[i], 2))
                 cv2.rectangle(img, (x, y), (x + w, y + h), self.color, 3)
                 cv2.putText(img, label + ' ' + confidence,
-                            (x, y + 20), self.font, 3, (255, 255, 255), 3)
+                            (x, y + h + 40), self.font, 2, (255, 255, 255), 1)
             self.fig_image = img
             self.coordinates = (x, y, w, h)
         return
@@ -70,31 +67,44 @@ class LicensePlateDetector:
         return
 
 
+def crop_all(images):
+    i = 0
+    for image in images:
+        lpd.detect(image)
+        lpd.crop_plate()
+        plt.figure(figsize=(10, 4))
+        plt.imshow(cv2.cvtColor(lpd.roi_image, cv2.COLOR_BGR2RGB))
+        plt.savefig('Crop/detected'+str(i)+'.jpg')
+        i += 1
+
+
+def show_plate_full(images):
+    for image in images:
+        lpd.detect(image)
+        plt.figure(figsize=(24, 24))
+        plt.imshow(cv2.cvtColor(lpd.fig_image, cv2.COLOR_BGR2RGB))
+        plt.show()
+
+
+def show_plate_cropped(images):
+    for image in images:
+        lpd.detect(image)
+        lpd.crop_plate()
+        plt.figure(figsize=(10, 5))
+        plt.imshow(cv2.cvtColor(lpd.roi_image, cv2.COLOR_BGR2RGB))
+        plt.show()
+
+
 lpd = LicensePlateDetector(
-    pth_weights="D:\Sem 5\Project\V-Num\YOLO help\yolov3-train_final.weights",
-    pth_cfg="D:\Sem 5\Project\V-Num\YOLO help\yolov3-train.cfg",
-    pth_classes="D:\Sem 5\Project\V-Num\YOLO help\classes.txt"
+    pth_weights="./yolov3-train_final.weights",
+    pth_cfg="./yolov3-train.cfg"
 )
 
-txt_files = [file for file in glob.glob(
+image_files = [file for file in glob.glob(
     'D:\Sem 5\Project\V-Num\DataSet\Images\*.jpg')]
 
-txt_files.sort()
-i = 0
-# Detect license plate
-for filename in txt_files:
-    lpd.detect(filename)
+image_files.sort()
 
-    # Plot original image with rectangle around the plate
-    plt.figure(figsize=(24, 24))
-    plt.imshow(cv2.cvtColor(lpd.fig_image, cv2.COLOR_BGR2RGB))
-    # plt.savefig('detected.jpg')
-    # plt.show()
-
-    # Crop plate and show cropped plate
-    lpd.crop_plate()
-    plt.figure(figsize=(10, 4))
-    plt.imshow(cv2.cvtColor(lpd.roi_image, cv2.COLOR_BGR2RGB))
-    plt.savefig('Cropped/detected'+str(i)+'.jpg')
-    # plt.show()
-    i += 1
+# crop_all(image_files)
+show_plate_full(image_files)
+# show_plate_cropped(image_files)
