@@ -59,6 +59,8 @@ cfg_path = "./yolov3-train.cfg"
 # Read dnn from weights and config file
 dnn = cv2.dnn.readNet(weight_path, cfg_path)
 
+dnn.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+dnn.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
 cap = cv2.VideoCapture(
     "../DataSet/Videos/KIC-1_Lane-04_1_20211213070000_20211213073000.avi")

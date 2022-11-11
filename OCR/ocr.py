@@ -60,7 +60,7 @@ def unet(pretrained_weights = None,input_size = (512,512,1)):
 #model = FCN(n_classes=2,  
 #  input_height=320, 
 #  input_width=320)
-model=unet("weights00000003.h5")
+model=unet("../OCR Trained Weights/weights00000003.h5")
 
 img = cv.imread('Photos/text.png',0)
 ret, img = cv.threshold(img, 150, 255, cv.THRESH_BINARY_INV)

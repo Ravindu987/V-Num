@@ -121,9 +121,9 @@ txts = []
 #     img = img/255
 #     images.append(img)
 
-for filename in os.listdir('./Sample_DataSet'):
+for filename in os.listdir('../Sample_DataSet'):
     txts.append(filename)
-    img = cv2.imread("./Sample_DataSet/"+filename, 0)
+    img = cv2.imread("../Sample_DataSet/"+filename, 0)
     cv2.imshow("Test", img)
     img = preprocess_img(img, (128, 32))
     # cv2.imshow("Image", img)
@@ -134,7 +134,7 @@ for filename in os.listdir('./Sample_DataSet'):
     cv2.waitKey(0)
 
 
-act_model.load_weights("./Trained Weights/best_model.hdf5")
+act_model.load_weights("../OCR Trained Weights/best_model.hdf5")
 stacked_imgs = np.stack(images)
 prediction = act_model.predict(stacked_imgs)
 
