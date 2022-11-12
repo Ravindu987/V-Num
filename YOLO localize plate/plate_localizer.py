@@ -73,6 +73,7 @@ image_paths = [file for file in glob.glob(
     '../DataSet/Images/*.jpg')]
 image_paths.sort()
 print(image_paths)
+
 # Read dnn from weights and config file
 dnn = cv2.dnn.readNet(weight_path, cfg_path)
 

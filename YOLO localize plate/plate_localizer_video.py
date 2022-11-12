@@ -66,6 +66,8 @@ cap = cv2.VideoCapture(
     "../DataSet/Videos/KIC-1_Lane-04_1_20211213073000_20211213080000.avi")
 
 i = 0 
+
+
 while (True):
     # Capture frame-by-frame
     ret, frame = cap.read()

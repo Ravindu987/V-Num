@@ -103,7 +103,9 @@ imagenames, txts = zip(*c)
 
 for i in range(len(imagenames)):
     img = cv2.imread(
+
         './wordimages/'+imagenames[i], 0)
+
     print(i)
     img = preprocess_img(img, (128, 32))
     img = np.expand_dims(img, axis=-1)
