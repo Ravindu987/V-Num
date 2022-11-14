@@ -2,7 +2,7 @@ import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import glob
+import time
 
 
 def localize_video(frame, dnn):
@@ -65,20 +65,60 @@ dnn.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 cap = cv2.VideoCapture(
     "../DataSet/Videos/KIC-1_Lane-04_1_20211213073000_20211213080000.avi")
 
-i = 0 
 
+fps_values = []
 
-while (True):
-    # Capture frame-by-frame
-    ret, frame = cap.read()
-    frame = cv2.resize(frame, (1080, 720))
-    if(i%3==0):
-        show_plate_video(frame, dnn)
-    cv2.imshow('frame', frame)
-    i+=1
-    if cv2.waitKey(20) & 0xFF == ord('q'):
-        break
+for j in range(4):
+
+    i = 1 
+    start = time.time()
+
+    if j==1:
+        freq=1
+    elif j==2:
+        freq=4
+    elif j==3:
+        freq=10
+
+    fps_readings=[]
+
+    while (True):
+        # Capture frame-by-frame
+        ret, frame = cap.read()
+        frame = cv2.resize(frame, (1080, 720))
+
+        if j!=0:
+            if(i%freq==0):
+                show_plate_video(frame, dnn)
+
+        cv2.imshow('frame', frame)
+
+        if(i%100==0):
+            fps = i/(time.time()-start)
+            print(fps)
+            fps_readings.append(fps)
+        if i==1000:
+            break
+        i+=1
+
+        if cv2.waitKey(20) & 0xFF == ord('q'):
+            break
+
+    fps_values.append(fps_readings)
+
+print(fps_values)
+
 
 # When everything done, release the capture
 cap.release()
 cv2.destroyAllWindows()
+
+num_frames = [100,200,300,400,500,600,700,800,900,1000]
+plt.plot(num_frames,fps_values[0],label="No detection")
+plt.plot(num_frames,fps_values[1],label="Detection every frame")
+plt.plot(num_frames,fps_values[2],label="Detection every 4 frames")
+plt.plot(num_frames,fps_values[3],label="Detection every 10 frames")
+plt.xlabel("Number of frames")
+plt.ylabel("Frame rate")
+plt.legend(bbox_to_anchor=(0.65,0.9))
+plt.show()
