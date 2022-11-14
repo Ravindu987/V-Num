@@ -38,6 +38,24 @@ The training of CNN models will be done using a computer with a CUDA enabled RTX
 
 By enabling CUDA, I was able to reduce the training time by a factor of 6 on GTX 1650 and 12 on RTX 2080.
 
+### Tuning
+
+One of the main decisions in setting up this module is setting up how to run predictions on the video stream. Running a prediction is a computationally expensive task and has to be done minimally. On the other hand as this is aimed towards high speed vehicles, the predictions has to be run frequently as well.
+I tested the fps output when 
+1. No prediction is done
+2. Prediction is done for every video frame
+3. Prediction is done for every 4 video frames
+4. Prediction is done for every 10 video frames
+
+Folliwng are the results for Yolov3 and v4.
+
+
+![Yolov3](https://user-images.githubusercontent.com/80534358/201687814-8244204f-635b-4673-b2dc-dfb43e29e17d.png)
+
+![Yolov4](https://user-images.githubusercontent.com/80534358/201687865-8870d744-1c49-4a1f-988f-72d56cc8847d.png)
+
+
+
 ### Timeline
 
 ![Timline_OCT_11](https://user-images.githubusercontent.com/80534358/195003300-9e98222d-2b3f-4397-a92d-bfb7c6ac8d3e.jpg)
