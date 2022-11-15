@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 import time
 
 
-def localize_video(frame, dnn):
+# Localize plate in given video frame
+def localize(frame, dnn):
     height, width, _ = frame.shape
     blob = cv2.dnn.blobFromImage(
         frame, 1/255, (416, 416), (0, 0, 0), swapRB=True, crop=False)
@@ -39,8 +40,9 @@ def localize_video(frame, dnn):
     return indexes, boxes, confidences
 
 
+# Predict bounding box
 def show_plate_video(frame, dnn):
-    indexes, boxes, confidences = localize_video(frame, dnn)
+    indexes, boxes, confidences = localize(frame, dnn)
     if len(indexes) > 0:
         for i in indexes.flatten():
             x, y, w, h = boxes[i]
@@ -48,7 +50,6 @@ def show_plate_video(frame, dnn):
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 255), 2)
             cv2.putText(frame, "license plate " + confidence,
                         (x, y + h + 40), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 1)
-        coordinates = (x, y, w, h)
     return
 
 
@@ -68,38 +69,45 @@ cap = cv2.VideoCapture(
 
 fps_values = []
 
+
+# Run for several detection frequencies
 for j in range(4):
 
-    i = 1 
     start = time.time()
 
-    if j==1:
-        freq=1
-    elif j==2:
-        freq=4
-    elif j==3:
-        freq=10
+    if j == 1:
+        freq = 1
+    elif j == 2:
+        freq = 4
+    elif j == 3:
+        freq = 10
 
-    fps_readings=[]
+    fps_readings = []
+
+    i = 1  # Count frames
 
     while (True):
         # Capture frame-by-frame
         ret, frame = cap.read()
         frame = cv2.resize(frame, (1080, 720))
 
-        if j!=0:
-            if(i%freq==0):
+        # Run detection according to relevant frequencies
+        if j != 0:
+            if (i % freq == 0):
                 show_plate_video(frame, dnn)
 
         cv2.imshow('frame', frame)
 
-        if(i%100==0):
+        # Calculate FPS value every 100
+        if (i % 100 == 0):
             fps = i/(time.time()-start)
             print(fps)
             fps_readings.append(fps)
-        if i==1000:
+
+        # Run with new frequency after 1000 frames
+        if i == 1000:
             break
-        i+=1
+        i += 1
 
         if cv2.waitKey(20) & 0xFF == ord('q'):
             break
@@ -113,12 +121,14 @@ print(fps_values)
 cap.release()
 cv2.destroyAllWindows()
 
-num_frames = [100,200,300,400,500,600,700,800,900,1000]
-plt.plot(num_frames,fps_values[0],label="No detection")
-plt.plot(num_frames,fps_values[1],label="Detection every frame")
-plt.plot(num_frames,fps_values[2],label="Detection every 4 frames")
-plt.plot(num_frames,fps_values[3],label="Detection every 10 frames")
+
+# Plot FPS values
+num_frames = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+plt.plot(num_frames, fps_values[0], label="No detection")
+plt.plot(num_frames, fps_values[1], label="Detection every frame")
+plt.plot(num_frames, fps_values[2], label="Detection every 4 frames")
+plt.plot(num_frames, fps_values[3], label="Detection every 10 frames")
 plt.xlabel("Number of frames")
 plt.ylabel("Frame rate")
-plt.legend(bbox_to_anchor=(0.65,0.9))
+plt.legend(bbox_to_anchor=(0.65, 0.9))
 plt.show()

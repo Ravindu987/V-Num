@@ -86,6 +86,12 @@ def show_plate_with_orig(imgpath, txtpath, dnn):
             cv2.putText(temp_img, "license plate " + confidence,
                         (x, y + h + 40), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 1)
         coordinates = (x, y, w, h)
+
+    prediction = get_plate_coordinates(imgpath, dnn)
+    prediction = [round(val,5) for val in prediction]
+    iou, intersection, union = intersection_over_union(gt_box, prediction)
+    print(iou,intersection, union)
+
     plt.figure(figsize=(24, 24))
     plt.imshow(cv2.cvtColor(temp_img, cv2.COLOR_BGR2RGB))
     plt.show()
@@ -99,7 +105,10 @@ def get_plate_coordinates(imgpath, dnn):
             x, y, w, h = boxes[i]
             confidence = str(round(confidences[i], 2))
         coordinates = (x, y, w, h)
-    return coordinates
+    if coordinates:
+        return coordinates
+    else:
+        return (0,0,0,0)
 
 
 def show_plate_all(image_paths, dnn):
@@ -155,14 +164,14 @@ def iou_all(image_paths,txt_paths,dnn):
     
 
 # Define relative path for weights and configuration file
-weight_path = "./yolov3-train_final.weights"
-cfg_path = "./yolov3-train.cfg"
+weight_path = "./yolov4-train_final.weights"
+cfg_path = "./yolov4-train.cfg"
 
 
 # Get image paths
 image_paths = [file for file in glob.glob(
-    '../YOLO train data/*.jpg')]
-txt_paths = [file for file in glob.glob('../YOLO train data/*.txt') if file != '../YOLO train data/classes.txt']
+    '../YOLO test data/*.jpg')]
+txt_paths = [file for file in glob.glob('../YOLO test data/*.txt') if file != '../YOLO test data/classes.txt']
 image_paths.sort()
 txt_paths.sort()
 # print(image_paths)
