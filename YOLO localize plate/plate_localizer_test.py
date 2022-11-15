@@ -1,10 +1,10 @@
-import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import glob
 
 
+# Predict bounding boxes using the CNN
 def localize(imgpath, dnn):
     img = cv2.imread(imgpath)
     height, width, _ = img.shape
@@ -40,17 +40,17 @@ def localize(imgpath, dnn):
     return indexes, boxes, confidences
 
 
+# Predict boudning box coordinates
 def get_plate_coordinates(imgpath, dnn):
     indexes, boxes, confidences = localize(imgpath, dnn)
     if len(indexes) > 0:
         for i in indexes.flatten():
             x, y, w, h = boxes[i]
-            confidence = str(round(confidences[i], 2))
         coordinates = (x, y, w, h)
     return coordinates
 
 
-
+# Func to calculate IoU
 def intersection_over_union(gt_box, pred_box):
     inter_box_top_left = [max(gt_box[0], pred_box[0]), max(gt_box[1], pred_box[1])]
     inter_box_bottom_right = [min(gt_box[0]+gt_box[2], pred_box[0]+pred_box[2]), min(gt_box[1]+gt_box[3], pred_box[1]+pred_box[3])]
@@ -65,12 +65,14 @@ def intersection_over_union(gt_box, pred_box):
     return iou, intersection, union
 
 
-def mean_iou(image_paths,txt_paths,dnn):
+# Get IoU values for each test
+def get_ious(image_paths,txt_paths,dnn):
+    tests = []
     ious= []
     for i in range(len(image_paths)):
         prediction = get_plate_coordinates(image_paths[i], dnn)
         prediction = [round(val,5) for val in prediction]
-        print(prediction)
+        # print(prediction)
 
         img = cv2.imread(image_paths[i])
         height, width, _ = img.shape
@@ -84,12 +86,14 @@ def mean_iou(image_paths,txt_paths,dnn):
         x = float(center_x - w / 2)
         y = float(center_y - h / 2)
         gt_box = [x,y,w,h]
-        print(gt_box)
+        # print(gt_box)
 
         iou, intersection, union = intersection_over_union(gt_box, prediction)
         print(iou)
+        tests.append(i)
         ious.append(iou)
-    return sum(ious)/len(ious)
+    
+    return tests, ious
 
     
 
@@ -98,7 +102,7 @@ weight_path = "./yolov3-train_final.weights"
 cfg_path = "./yolov3-train.cfg"
 
 
-# Get image paths
+# Get image and text paths
 image_paths = [file for file in glob.glob(
     '../YOLO train data/*.jpg')]
 txt_paths = [file for file in glob.glob('../YOLO train data/*.txt') if file != '../YOLO train data/classes.txt']
@@ -110,7 +114,17 @@ txt_paths.sort()
 # Read dnn from weights and config file
 dnn = cv2.dnn.readNet(weight_path, cfg_path)
 
+# Get IoU values for each test case
+tests, ious = get_ious(image_paths, txt_paths, dnn)
+mean = round(sum(ious)/len(tests),2)
 
-mean_iou = mean_iou(image_paths, txt_paths, dnn)
 
-print(mean_iou)
+# Plot IoU values
+fig = plt.figure()
+v3 = fig.add_subplot()
+v3.set_title("Yolo v3")
+v3.plot(tests,ious)
+v3.text(0.75,0.25,"Mean: "+str(mean), fontsize=10, transform=fig.transFigure)
+v3.set_xlabel("Tests")
+v3.set_ylabel("IoU")
+plt.show()
