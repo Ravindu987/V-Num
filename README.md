@@ -20,6 +20,7 @@ In order to achieve high success rates in uncontrolled environments efficient an
 - Since the cameras installed at toll gates cover a lot of area, the approach to apply character recognition to the entire video frame becomes inefficient and requires a tremendous amount of computational power to acheive a reliable success rate. Therefore as the first module of the pipeline was dedicated for localizing and cropping out the vehicle number plate from the frame.
 - An object detection algorithm was used for this purpose. Both YOLO v3 and v4 algorithms were both tested for this purpose.
 - Darknet framework was used to train the model.
+- Manual built OpenCV with GPU support was used to run predictions on video file.
 
 #### 2. OCR
 
@@ -32,7 +33,7 @@ The localized characters needs to be identified and this will be done using OCR 
 ### Hardware Modules
 
 High quality cameras are used to gather the video stream.
-The sequent processing will be done using a computer with a CUDA enabled GTX 1650 graphics processing unit.
+The sequent processing will be done using a computer with a CUDA enabled GTX 1650 graphics processing unit and a 9th gen Intel core i7 processor.
 
 The training of CNN models will be done using a computer with a CUDA enabled RTX 2080 graphics processing unit for time efficiency.
 
