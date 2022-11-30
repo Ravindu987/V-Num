@@ -60,15 +60,18 @@ def unet(pretrained_weights = None,input_size = (512,512,1)):
 #model = FCN(n_classes=2,  
 #  input_height=320, 
 #  input_width=320)
-model=unet("weights00000003.h5")
+model=unet("./PageSeg_Weights/weights00000003.h5")
 
-img = cv.imread('Photos/text.png',0)
-ret, img = cv.threshold(img, 150, 255, cv.THRESH_BINARY_INV)
+img = cv.imread('./Cropped_New/detected1.jpg',0)
+ret, img = cv.threshold(img, 100, 255, cv.THRESH_BINARY_INV)
 img = cv.resize(img, (512,512))
+# cv.imshow("Frame",img)
+# cv.waitKey(0)
 img = np.expand_dims(img, axis=-1)
 img = np.expand_dims(img, axis=0)
+
 
 pred = model.predict(img)
 pred=np.squeeze(np.squeeze(pred,axis=0),axis=-1)
 plt.imshow(pred, cmap='gray')
-plt.imsave('Masked Photos/test_img_mask.jpg', pred)
+plt.imsave('./Cropped_New_Masks/test_img_mask.jpg', pred)

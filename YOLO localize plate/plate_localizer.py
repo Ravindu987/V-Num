@@ -105,10 +105,11 @@ def get_plate_coordinates(imgpath, dnn):
             x, y, w, h = boxes[i]
             confidence = str(round(confidences[i], 2))
         coordinates = (x, y, w, h)
-    if coordinates:
-        return coordinates
-    else:
-        return (0,0,0,0)
+        if coordinates!=None:
+            return coordinates
+        else:
+            return (0,0,0,0)
+    return (0,0,0,0)
 
 
 def show_plate_all(image_paths, dnn):
@@ -162,16 +163,29 @@ def iou_all(image_paths,txt_paths,dnn):
         print(iou,intersection, union)
 
     
+def crop_all(image_paths,dnn):
+    i = 1
+    for image_path in image_paths:
+        (x, y, w, h) = get_plate_coordinates(image_path, dnn)
+        if (x,y,w,h)!=(0,0,0,0):
+            img = cv2.imread(image_path)
+            img_copy =  img.copy()
+            cropped = img_copy[y:y+h, x:x+w]
+            cv2.imwrite('./Cropped License Plates/detected'+str(i)+'.jpg',cropped)
+            i+=1
+
+
+
 
 # Define relative path for weights and configuration file
-weight_path = "./yolov4-train_final.weights"
-cfg_path = "./yolov4-train.cfg"
+weight_path = "./YOLO localize plate/yolov4-train_final.weights"
+cfg_path = "./YOLO localize plate/yolov4-train.cfg"
 
 
 # Get image paths
 image_paths = [file for file in glob.glob(
-    '../YOLO test data/*.jpg')]
-txt_paths = [file for file in glob.glob('../YOLO test data/*.txt') if file != '../YOLO test data/classes.txt']
+    './DataSet/Images/*.jpg')]
+txt_paths = [file for file in glob.glob('./YOLO test data/*.txt') if file != './YOLO test data/classes.txt']
 image_paths.sort()
 txt_paths.sort()
 # print(image_paths)
@@ -180,8 +194,8 @@ txt_paths.sort()
 # Read dnn from weights and config file
 dnn = cv2.dnn.readNet(weight_path, cfg_path)
 
-# crop_all(image_files)
+crop_all(image_paths,dnn)
 # show_plate_all(image_paths, dnn)
 # show_plate_cropped(image_files)
 # iou_all(image_paths, txt_paths, dnn)
-show_plate_all_with_orig(image_paths, txt_paths, dnn)
+# show_plate_all_with_orig(image_paths, txt_paths, dnn)
