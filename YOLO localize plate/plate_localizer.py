@@ -61,9 +61,6 @@ def show_plate_with_orig(imgpath, txtpath, dnn):
     img = cv2.imread(imgpath)
     height, width, _ = img.shape
     temp_img = img.copy()
-    # cv2.imshow("t",temp_img)
-    # cv2.waitKey(0) # waits until a key is pressed
-    # cv2.destroyAllWindows() # destroys the window showing image
     indexes, boxes, confidences = localize(imgpath, dnn)
     label = open(txtpath).readline().split()
     label = [ float(x) for x in label]
