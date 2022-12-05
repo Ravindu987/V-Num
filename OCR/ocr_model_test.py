@@ -19,7 +19,7 @@ def load_data(data_path):
         validation_split=0.1,
         subset="training",
         seed=123,
-        batch_size=16
+        batch_size=8
     )
 
     val_ds = tf.keras.utils.image_dataset_from_directory(
@@ -27,12 +27,12 @@ def load_data(data_path):
         validation_split=0.1,
         subset="training",
         seed=123,
-        batch_size=16
+        batch_size=8
     )
 
     return train_ds, val_ds
 
-train_ds, val_ds = load_data("./Cropped_Letters/DONE/splitted")
+train_ds, val_ds = load_data("./Train Digit Data/")
 
 class_names = train_ds.class_names
 
@@ -81,7 +81,7 @@ model.compile(
     )
 
 
-checkpoint_path = "./Cropped_Letters/DONE/splitted/model.hdf5"
+checkpoint_path = "./Train Digit Data/model.hdf5"
 callback = tf.keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_path,
     save_best_only=True,
@@ -89,5 +89,5 @@ callback = tf.keras.callbacks.ModelCheckpoint(
     )
 
 
-model.fit(train_ds, validation_data=val_ds, epochs=3, callbacks=[callback])
+model.fit(train_ds, validation_data=val_ds, epochs=15, callbacks=[callback])
 
