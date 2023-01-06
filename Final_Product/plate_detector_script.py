@@ -1,7 +1,5 @@
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-import random
 
 # Localize plate in given video frame
 def localize(frame, dnn):
@@ -17,6 +15,7 @@ def localize(frame, dnn):
     class_ids = []
 
     for output in layer_outputs:
+        
         for detect in output:
             scores = detect[5:]
             class_id = np.argmax(scores)
@@ -38,7 +37,7 @@ def localize(frame, dnn):
     return indexes, boxes, confidences
 
 
-# Predict bounding box
+# Predict bounding box and save to storage
 def show_plate_video(frame, dnn, name_counter):
     indexes, boxes, confidences = localize(frame, dnn)
     if len(indexes) > 0:
@@ -55,19 +54,20 @@ def show_plate_video(frame, dnn, name_counter):
     return False
 
 
-
+# Default settings for plate detection
 def run_default(cap, name_counter):
+
+    #Set counters
     i=0
-    j=201
+    j=301
+
     while (True):
-        i+=1
-        j+=1
+
         # Capture frame-by-frame
         ret, frame = cap.read()
         frame = cv2.resize(frame, (1080, 720))
-        h,w,c = frame.shape
-        roi_frame = frame[0:h,w//5:4*w//5]
 
+        # Run detection algorithm once evry 10 frames, 
         if (i % 10 == 0 and j>300):
             if show_plate_video(frame, dnn, name_counter):
                 print(i,j)
@@ -79,12 +79,16 @@ def run_default(cap, name_counter):
         if cv2.waitKey(20) & 0xFF == ord('q'):
             break
 
+        i+=1
+        j+=1
+
     # When everything done, release the capture
     cap.release()
     cv2.destroyAllWindows()
 
 
 if __name__=="__main__":
+    
     # Define relative path for weights and configuration file
     weight_path = "./YOLO localize plate/yolov4-train_final.weights"
     cfg_path = "./YOLO localize plate/yolov4-train.cfg"
@@ -100,7 +104,6 @@ if __name__=="__main__":
         "./DataSet/Videos/KIC-1_Lane-04_1_20211213073000_20211213080000.avi")
 
     # show_on_video()
-    # run_multi_configs(cap)
     run_default(cap, name_counter)
 
 
