@@ -5,6 +5,7 @@ import numpy as np
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
+
 # Write text to file
 def WriteToFile(filename, text):
     file = open(filename, "a")
