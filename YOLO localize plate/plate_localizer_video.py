@@ -54,7 +54,7 @@ def show_plate_video(frame, dnn):
 
 
 # Run detections on multiple configurations and show results
-def run_multi_configs():
+def run_multi_configs(cap):
     fps_values = []
 
 
@@ -118,6 +118,23 @@ def run_multi_configs():
     plt.show()
 
 
+def run_default(cap):
+    i=0
+    while (True):
+        i+=1
+        # Capture frame-by-frame
+        ret, frame = cap.read()
+        frame = cv2.resize(frame, (1080, 720))
+
+        if (i % 10 == 0):
+            show_plate_video(frame, dnn)
+
+        cv2.imshow('frame', frame)
+
+        if cv2.waitKey(20) & 0xFF == ord('q'):
+            break
+
+
 # Run detections on video
 def show_on_video():
     i=0
@@ -141,8 +158,8 @@ def show_on_video():
 
 
 # Define relative path for weights and configuration file
-weight_path = "./YOLO localize plate/yolov3-train_final.weights"
-cfg_path = "./YOLO localize plate/yolov3-train.cfg"
+weight_path = "./YOLO localize plate/yolov4-train_final.weights"
+cfg_path = "./YOLO localize plate/yolov4-train.cfg"
 
 # Read dnn from weights and config file
 dnn = cv2.dnn.readNet(weight_path, cfg_path)
@@ -154,6 +171,7 @@ cap = cv2.VideoCapture(
     "./DataSet/Videos/KIC-1_Lane-04_1_20211213073000_20211213080000.avi")
 
 # show_on_video()
-run_multi_configs()
+# run_multi_configs(cap)
+run_default(cap)
 
 

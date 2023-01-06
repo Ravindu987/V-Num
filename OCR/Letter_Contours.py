@@ -16,7 +16,7 @@ def filter_contours(contours, img):
         # print(x,y,w,h)
         height, width, channels = img.shape
         # print(h/height, w/width)
-        if ( h/height < 0.3 or w/width<0.05 or h/height>0.8 or w/width>0.4):
+        if ( h/height < 0.35 or w/width<0.05 or h/height>0.75 or w/width>0.4):
             continue
         else:
             filtered_contours.append(contour)
@@ -45,33 +45,33 @@ def draw_contours(img, path):
     sorted_contours = filter_contours(contours, img)
 
     # for contour in sorted_contours:
-    #     blank = np.zeros((img.shape[0],img.shape[1],3), dtype='uint8')
-    #     cv.drawContours(blank, contour, -1, (0,255,0), 1)
-    #     cv.imshow('Contours blank', blank)
-    #     cv.waitKey(0) 
-    #     cv.destroyAllWindows()
+    #     blank = np.zeros((img.shape[0],img.shape[1],3), dtype='uint8') + 255
+    #     cv.drawContours(blank, contour, -1, (0,0,0), 1)
+        # cv.imshow('Contours blank', blank)
+        # cv.waitKey(0) 
+        # cv.destroyAllWindows()
 
-    blank = np.zeros((img.shape[0],img.shape[1],3))
-    for contour in sorted_contours:
-        cv.drawContours(blank,contour, -1, (255,0,0),1)
+    # blank = np.zeros((img.shape[0],img.shape[1],3))
+    # for contour in sorted_contours:
+    #     cv.drawContours(blank,contour, -1, (255,0,0),1)
     # cv.imshow("All contours", blank)
     # cv.waitKey(0)
     # cv.destroyAllWindows()
 
-    save_contours(sorted_contours, img.shape, path )
+    save_contours(sorted_contours, img.shape, path, img )
 
 
-def save_contours(contours, img_size, path):
+def save_contours(contours, img_size, path, img):
     i = 1
     for contour in contours:
-        print(path)
+        # print(path)
         x,y,w,h = cv.boundingRect(contour)
-        blank = np.zeros((img_size[0]+6, img_size[1]+6 ,1))
-        blank = blank+255
-        cv.drawContours(blank,contour,-1,(0,0,0),2, offset=(3,3))
-        roi_img = blank[y:y+h+6,x:x+w+6]
+        # blank = np.zeros((img_size[0]+6, img_size[1]+6 ,1))
+        # blank = blank+255
+        # cv.drawContours(blank,contour,-1,(0,0,0),2, offset=(3,3))
+        roi_img = img[y:y+h+6,x:x+w+6]
         prefix = path.split(".")[0][7:]
-        cv.imwrite("./Cropped Letters/L"+prefix+str(i)+".jpg",roi_img)
+        cv.imwrite("./Cropped Letters Orig/L"+prefix+str(i)+".jpg",roi_img)
         i+=1
 
 
@@ -86,16 +86,29 @@ def upscale_image(imgpath, sr):
     upsampled = sr.upsample(img)
     return upsampled
 
-sr = cv.dnn_superres.DnnSuperResImpl_create()
- 
-path = "./OCR/ESPCN_x3.pb"
-sr.readModel(path)
-sr.setModel("espcn",3)
+if __name__=="__main__":
+    sr = cv.dnn_superres.DnnSuperResImpl_create()
+    
+    path = "./OCR/EDSR_x2.pb"
+    sr.readModel(path)
+    sr.setModel("edsr",2)
 
-image_list = os.listdir("./Cropped License Plates")
+    image_list = os.listdir("./Cropped License Plates")
 
-for image_path in image_list:
-    recognize_image(image_path, sr)
-    # enhance_image("./Cropped_New/"+image_path)
-    # upscale_image("./Cropped_New/"+image_path, sr)
+    for image_path in image_list:
+        recognize_image(image_path, sr)
+        # enhance_image("./Cropped_New/"+image_path)
+        # upscaled = upscale_image("./Cropped_New/"+image_path, sr)
+
+    # image_path = "detected106.jpg"
+    # img = cv.imread(image_path)
+    # upsampled = sr.upsample(img)
+    # upsampled = sr.upsample(upsampled)
+    # upsampled = sr.upsample(upsampled)
+    # upsampled = sr.upsample(upsampled)
+    # upsampled = sr.upsample(upsampled)
+
+    # upsampled = cv.detailEnhance(img,10,0.15)
+    # upsampled = cv.resize(upsampled, (img.shape[1]*3,img.shape[0]*3))
+    # cv.imwrite("esdr_2x.jpg",upsampled)
 

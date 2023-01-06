@@ -15,24 +15,27 @@ def show_data_sample(train_ds, class_names):
 
 def load_data(data_path):
     train_ds = tf.keras.utils.image_dataset_from_directory(
-        data_path,
-        validation_split=0.1,
-        subset="training",
+        "./Train Digit Data split/train",
+        # validation_split=0.1,
+        image_size=(128,128),
+        # subset="training",
         seed=123,
-        batch_size=8
+        batch_size=16
     )
 
     val_ds = tf.keras.utils.image_dataset_from_directory(
-        data_path,
-        validation_split=0.1,
-        subset="training",
+        # data_path,
+        "./Train Digit Data split/val",
+        # validation_split=0.1,
+        image_size=(128,128),
+        # subset="validation",
         seed=123,
-        batch_size=8
+        batch_size=16
     )
 
     return train_ds, val_ds
 
-train_ds, val_ds = load_data("./Train Digit Data/")
+train_ds, val_ds = load_data("./Train Letter Data All/")
 
 class_names = train_ds.class_names
 
@@ -48,10 +51,10 @@ normalization_layer = tf.keras.layers.Rescaling(1./255)
 normalized_ds = train_ds.map(lambda x,y: (normalization_layer(x),y))
 
 
-AUTOTUNE = tf.data.AUTOTUNE
+# AUTOTUNE = tf.data.AUTOTUNE
 
-train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
-val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
+# train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
+# val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
 num_classes = len(class_names)
 
@@ -81,7 +84,7 @@ model.compile(
     )
 
 
-checkpoint_path = "./Train Digit Data/model.hdf5"
+checkpoint_path = "./CNN letter Dataset/model_mixed_2.hdf5"
 callback = tf.keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_path,
     save_best_only=True,
@@ -89,5 +92,5 @@ callback = tf.keras.callbacks.ModelCheckpoint(
     )
 
 
-model.fit(train_ds, validation_data=val_ds, epochs=15, callbacks=[callback])
+model.fit(train_ds, validation_data=val_ds, epochs=5, callbacks=[callback])
 

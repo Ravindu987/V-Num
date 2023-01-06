@@ -1,28 +1,13 @@
-PageSegData
-OCR Trained Weights
+Character Recognition Weights
+Cropped Letters
+Cropped Letters - Preprocessed
+Cropped License Plates
+Darknet
 DataSet
-Sample_DataSet
-Cropped
+Train Character Data
+Train Digit Data
 YOLO localize plate/yolov3-train_final.weights
 YOLO localize plate/yolov4-train_final.weights
-YOLO Trained Weights
+YOLO Train&Weights
 YOLO train data
-YOLO test data
-OCR train data
-Darknet
-YOLOv4_trained_weights
-link.txt
-Images
-Cropped_New
-Cropped_New_Masks
-OCR/EDSR_x4.pb
-Cropped License Plates
-madaya1.png
-madaya2.png
-Test.png
-Letters
-Test Letters
-PageSeg_Weights
-Cropped_Letters
-Additional Digit Dataset
-Train Digit Data
+YOLO Test data
