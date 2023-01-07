@@ -81,7 +81,7 @@ sr.setModel("edsr",3)
     # cv.waitKey(0)
     # cv.destroyAllWindows()
 
-img = cv.imread("./Final_Product/cropped_plates/detect4.jpg")
+img = cv.imread("./Final_Product/cropped_plates/detect20.jpg")
 upsampled = sr.upsample(img)
 cv.imshow("Plate",upsampled)
 cv.waitKey(0)
