@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 import os
 import tensorflow as tf
-from Letter_Contours import filter_contours, x_cord_contour
+from Letter_Contours import filter_contours
 
 
 def get_prediction(img):
@@ -50,7 +50,7 @@ def get_letters(img):
 
 classes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 
-ocr_model = tf.keras.models.load_model('./CNN letter Dataset/model_mixed_1.hdf5')
+ocr_model = tf.keras.models.load_model('./Character Recognition Weights/model_mixed_1.hdf5')
 
 sr = cv.dnn_superres.DnnSuperResImpl_create()
  
@@ -81,7 +81,7 @@ sr.setModel("edsr",3)
     # cv.waitKey(0)
     # cv.destroyAllWindows()
 
-img = cv.imread("./Final_Product/cropped_plates/detect4.jpg")
+img = cv.imread("./Final_Product/cropped_plates/detect20.jpg")
 upsampled = sr.upsample(img)
 cv.imshow("Plate",upsampled)
 cv.waitKey(0)
