@@ -13,31 +13,56 @@
 
 ### Software algorithms
 
-In order to achieve high success rates in uncontrolled environments efficient and reliable software algorithms have to be implemented. This project will consist of two such major software modules.
+In order to achieve high success rates in uncontrolled environments efficient and reliable software algorithms have to be implemented. This project will consist of three such major software modules.
 
 #### 1. Plate Localization
 
 - Since the cameras installed at toll gates cover a lot of area, the approach to apply character recognition to the entire video frame becomes inefficient and requires a tremendous amount of computational power to acheive a reliable success rate. Therefore as the first module of the pipeline was dedicated for localizing and cropping out the vehicle number plate from the frame.
 - An object detection algorithm was used for this purpose. Both YOLO v3 and v4 algorithms were both tested for this purpose.
+- YOLO v4 slowed a slightly better IoU than v3.
 - Darknet framework was used to train the model.
 - Manual built OpenCV with GPU support was used to run predictions on video file.
 
-#### 2. OCR
+- Application
+   - The detection algorithm was run on the frames of the video input using the trained weights.
+   - Since it is computationally expensive to run detection on each and every frame, tuning is done. More details are given below.
+   - The detected plate was cropped out and saved to a directory.
 
-The localized characters needs to be identified and this will be done using OCR ( Optical Character Recognition) algorithms. For this purpose I have currently implemented a CRNN model which consists of convolutional layers followed by LSTM RNN layers which combined can etxract information from the image.
+#### 2. Character Localization
 
-- CNN is used to extract features from the image
-- RNN (LSTM) to predict characters
-- Finally a CTC layer is used for the classification.
+Due to the nature of the license plate it is inefficient to read the entire number at once. Therefore relevant characters were localized first.
 
-### Hardware Modules
+- Upsampling
+   - The cropped out plates were of low quality and therefoe image upsampling was carried out to enhance image quality. 
+   - Several methods including ESRGAN, ESPCN, LapSRN was used. The method which provided best outcome was the image super rsolution technique EDSR.
+   - This is not computationally expensive.
+   
+  - Localization
+   - Achieved using image processing techniques.
+   - Image was grayscaled and Otsu binarization was done to clear the image.
+   - Contour detection was done and smaller and larger contours were filtered out. 
+   - Using the bounding box of the contour, the character from the original image was cropped out.
 
-High quality cameras are used to gather the video stream.
-The sequent processing will be done using a computer with a CUDA enabled GTX 1650 graphics processing unit and a 9th gen Intel core i7 processor.
+#### 3. Character Recognition
 
-The training of CNN models will be done using a computer with a CUDA enabled RTX 2080 graphics processing unit for time efficiency.
+- A custom CNN was trained to recognize the characters from the license plate.
+- CNN model was trained on 35,000 character images from the internet and 20,000 images from the target dataset and was tested on 1000 images from the target distribution.
+- Neual network consisted of 3 Convolution and Pooling layers with 2 dense layes and softmax activation at the end.
+- SparseCategoricalCrossentropy was used as the loss function and adam optimizer was used.
+- The weights were stored in HDF5 format.
+   
+### Hardware Modules and other platforms
 
-By enabling CUDA, I was able to reduce the training time by a factor of 6 on GTX 1650 and 12 on RTX 2080.
+The processing was done using a computer with a CUDA enabled GTX 1650 graphics processing unit and a 9th gen Intel core i7 processor.
+The training of CNN models was be done using a computer with a CUDA enabled RTX 2080 graphics processing unit for time efficiency.
+
+Linux Mint and Ubuntu were mainly used as the operating systems for the project.
+A manual built GPU support Opencv build was used for image processing.
+Cuda 11.8 and CuDNN were used to get GPU support for processing.
+Tensorflow-GPU libary was as the framework for deep learning.
+
+By enabling CUDA and using GPU for processing, I was able to increase the time efficiency for all the training, preprocessing, image processing and prediction modules.
+As an example, CuDNN reduced the training time of the YOLo model by a factor of 6 on GTX 1650 and 12 on RTX 2080 compared to default CPU processing.
 
 
 ### Accuracy
@@ -67,20 +92,15 @@ Folliwng are the results for Yolov3 and v4.
 ![Yolov4](https://user-images.githubusercontent.com/80534358/201687865-8870d744-1c49-4a1f-988f-72d56cc8847d.png)
 
 
-### Timeline
-
-![Timline_OCT_11](https://user-images.githubusercontent.com/80534358/195003300-9e98222d-2b3f-4397-a92d-bfb7c6ac8d3e.jpg)
-
 ### References
 
-1. Kang, Dong. (2009). Dynamic programming-based method for extraction of license plate numbers of speeding vehicles on the highway. International Journal of Automotive Technology. 10. 205-210. 10.1007/s12239-009-0024-2.
+1. ralhad Gavali, J. Saira Banu,
+Chapter 6 - Deep Convolutional Neural Network for Image Classification on CUDA Platform
 
-2. Drobac, Senka; LindÃ©n, Krister (2020). Optical character recognition with neural networks and post-correction with finite state methods. International Journal on Document Analysis and Recognition (IJDAR), (), –. doi:10.1007/s10032-020-00359-9
+2. J. Shashirangana, H. Padmasiri, D. Meedeniya and C. Perera, "Automated License Plate Recognition: A Survey on Methods and Techniques," in IEEE Access, vol. 9, pp. 11203-11225, 2021, doi: 10.1109/ACCESS.2020.3047929.
 
-3. Graves, Alex & Fernández, Santiago & Gomez, Faustino & Schmidhuber, Jürgen. (2006). Connectionist temporal classification: Labelling unsegmented sequence data with recurrent neural 'networks. ICML 2006 - Proceedings of the 23rd International Conference on Machine Learning. 2006. 369-376. 10.1145/1143844.1143891.
+3. Redmon, J., Divvala, S., Girshick, R., & Farhadi, A. (2016). You only look once: Unified, real-time object detection. In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 779-788).
 
-4. Wick, Christoph & Reul, Christian & Puppe, Frank. (2018). Calamari - A High-Performance Tensorflow-based Deep Learning Package for Optical Character Recognition
+4. Lim, B., Son, S., Kim, H., Nah, S. and Mu Lee, K., 2017. Enhanced deep residual networks for single image super-resolution. In Proceedings of the IEEE conference on computer vision and pattern recognition workshops (pp. 136-144)
 
-5. Jiuxiang Gu, Zhenhua Wang, Jason Kuen, Lianyang Ma, Amir Shahroudy, Bing Shuai, Ting Liu, Xingxing Wang, Gang Wang, Jianfei Cai, Tsuhan Chen,
-   Recent advances in convolutional neural networks,
-   Pattern Recognition,
+5. Kang, Dong. (2009). Dynamic programming-based method for extraction of license plate numbers of speeding vehicles on the highway. International Journal of Automotive Technology. 10. 205-210. 10.1007/s12239-009-0024-2.
