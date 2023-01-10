@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 
 # Localize plate in given video frame
+
+
 def localize(frame, dnn):
     height, width, _ = frame.shape
     blob = cv2.dnn.blobFromImage(
@@ -15,7 +17,7 @@ def localize(frame, dnn):
     class_ids = []
 
     for output in layer_outputs:
-        
+
         for detect in output:
             scores = detect[5:]
             class_id = np.argmax(scores)
@@ -47,9 +49,9 @@ def show_plate_video(frame, dnn, name_counter):
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 255), 2)
             cv2.putText(frame, "license plate " + confidence,
                         (x, y + h + 40), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 1)
-            roi = frame[y:y+h,x:x+w]
+            roi = frame[y:y+h, x:x+w]
             rand = "detect"+str(name_counter)
-            cv2.imwrite("./Final_Product/cropped_plates/"+rand+".jpg",roi)
+            cv2.imwrite("./Final_Product/cropped_plates/"+rand+".jpg", roi)
         return True
     return False
 
@@ -57,9 +59,9 @@ def show_plate_video(frame, dnn, name_counter):
 # Default settings for plate detection
 def run_default(cap, name_counter):
 
-    #Set counters
-    i=0
-    j=301
+    # Set counters
+    i = 0
+    j = 301
 
     while (True):
 
@@ -67,28 +69,28 @@ def run_default(cap, name_counter):
         ret, frame = cap.read()
         frame = cv2.resize(frame, (1080, 720))
 
-        # Run detection algorithm once evry 10 frames, 
-        if (i % 10 == 0 and j>300):
+        # Run detection algorithm once evry 10 frames,
+        if (i % 10 == 0 and j > 300):
             if show_plate_video(frame, dnn, name_counter):
-                print(i,j)
-                j=1
-                name_counter+=1
+                print(i, j)
+                j = 1
+                name_counter += 1
 
         cv2.imshow('frame', frame)
 
         if cv2.waitKey(20) & 0xFF == ord('q'):
             break
 
-        i+=1
-        j+=1
+        i += 1
+        j += 1
 
     # When everything done, release the capture
     cap.release()
     cv2.destroyAllWindows()
 
 
-if __name__=="__main__":
-    
+if __name__ == "__main__":
+
     # Define relative path for weights and configuration file
     weight_path = "./YOLO localize plate/yolov4-train_final.weights"
     cfg_path = "./YOLO localize plate/yolov4-train.cfg"
@@ -105,5 +107,3 @@ if __name__=="__main__":
 
     # show_on_video()
     run_default(cap, name_counter)
-
-

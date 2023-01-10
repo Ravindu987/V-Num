@@ -1,13 +1,13 @@
 import tensorflow as tf
 from keras.layers import Conv2D, Dense, MaxPooling2D, Flatten, Rescaling
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.losses import SparseCategoricalCrossentropy
 
 
 # Load data from train and test sets
 def load_data(data_path):
     train_ds = tf.keras.utils.image_dataset_from_directory(
-        data_path+"train",
+        data_path+"backup",
         image_size=(128, 128),
         seed=123,
         batch_size=16
@@ -40,13 +40,16 @@ num_classes = len(class_names)
 # Define model
 model = tf.keras.Sequential([
     Rescaling(1./255),
-    Conv2D(32, 3, activation='relu'),
+    Conv2D(32, 5, activation='relu'),
     MaxPooling2D(pool_size=2, strides=2),
-    Conv2D(64, 3, activation='relu'),
+    Conv2D(64, 5, activation='relu'),
     MaxPooling2D(pool_size=2, strides=2),
-    Conv2D(128, 3, activation='relu'),
+    Conv2D(128, 5, activation='relu'),
+    MaxPooling2D(pool_size=2, strides=2),
+    Conv2D(256, 5, activation='relu'),
     MaxPooling2D(pool_size=2, strides=2),
     Flatten(),
+    Dense(128, activation='relu'),
     Dense(64, activation='relu'),
     Dense(num_classes, activation='softmax')
 ])
@@ -59,12 +62,17 @@ model.compile(
 )
 
 
-checkpoint_path = "./Character Recognition Weights/model_mixed_3.hdf5"
-callback = ModelCheckpoint(
+checkpoint_path = "./Character Recognition Weights/model_mixed_9.hdf5"
+checkpoint = ModelCheckpoint(
     filepath=checkpoint_path,
     save_best_only=True,
     verbose=1
 )
 
+early_stop = EarlyStopping(
+    monitor="val_loss"
+)
 
-model.fit(train_ds, validation_data=val_ds, epochs=5, callbacks=[callback])
+
+model.fit(train_ds, validation_data=val_ds, epochs=5,
+          callbacks=[checkpoint, early_stop])
