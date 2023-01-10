@@ -8,8 +8,15 @@ from watchdog.observers import Observer
 
 # Write text to file
 def WriteToFile(filename, text):
-    file = open(filename, "a")
-    file.write(text+"\n")
+    file = open(filename, "a+")
+    file.seek(0)
+    last_entry = ""
+    lines = file.readlines()
+    if len(lines) != 0:
+        last_entry = lines[-1]
+        print(last_entry)
+    if text not in last_entry:
+        file.write(text+"\n")
 
 
 def x_cord_contour(contours):
