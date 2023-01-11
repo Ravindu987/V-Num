@@ -14,7 +14,6 @@ def WriteToFile(filename, text):
     lines = file.readlines()
     if len(lines) != 0:
         last_entry = lines[-1]
-        print(last_entry)
     if text not in last_entry:
         file.write(text+"\n")
 

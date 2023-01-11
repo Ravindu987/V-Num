@@ -1,9 +1,7 @@
 import cv2
-import numpy as np
+
 
 # Localize plate in given video frame
-
-
 def localize(frame, dnn):
     height, width, _ = frame.shape
     blob = cv2.dnn.blobFromImage(
@@ -14,14 +12,10 @@ def localize(frame, dnn):
 
     boxes = []
     confidences = []
-    class_ids = []
 
     for output in layer_outputs:
-
         for detect in output:
-            scores = detect[5:]
-            class_id = np.argmax(scores)
-            confidence = scores[class_id]
+            confidence = detect[5]
             if confidence > 0.7:
                 center_x = int(detect[0] * width)
                 center_y = int(detect[1] * height)
@@ -31,21 +25,26 @@ def localize(frame, dnn):
                 y = int(center_y - h / 2)
 
                 boxes.append([x, y, w, h])
-                confidences.append((float(confidence)))
-                class_ids.append(class_id)
+                confidences.append(round(float(confidence), 2))
 
+    # Run non max suppresion on bounding boxes
     indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.2, 0.4)
 
-    return indexes, boxes, confidences
+    # Return only the boxes selected by NMS
+    ret_boxes = []
+    for i in indexes:
+        ret_boxes.append((boxes[i], confidences[i]))
+
+    return ret_boxes
 
 
 # Predict bounding box and save to storage
 def show_plate_video(frame, dnn, name_counter):
-    indexes, boxes, confidences = localize(frame, dnn)
-    if len(indexes) > 0:
-        for i in indexes.flatten():
-            x, y, w, h = boxes[i]
-            confidence = str(round(confidences[i], 2))
+    boxes = localize(frame, dnn)
+    if len(boxes) > 0:
+        for box in boxes:
+            x, y, w, h = box[0]
+            confidence = str(box[1])
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 255), 2)
             cv2.putText(frame, "license plate " + confidence,
                         (x, y + h + 40), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 1)
@@ -101,6 +100,9 @@ if __name__ == "__main__":
 
     dnn.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
     dnn.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+
+    # cap = cv2.VideoCapture(
+    #     "./DataSet/Videos/KIC-1_Lane-04_1_20211213183000_20211213190000.avi")
 
     cap = cv2.VideoCapture(
         "./DataSet/Videos/KIC-1_Lane-04_1_20211213073000_20211213080000.avi")

@@ -66,7 +66,7 @@ sr.readModel(path)
 sr.setModel("edsr", 3)
 
 
-img = cv.imread("./Final_Product/cropped_plates/detect7.jpg")
+img = cv.imread("./Final_Product/cropped_plates/detect10.jpg")
 upsampled = sr.upsample(img)
 cv.imshow("Plate", upsampled)
 cv.waitKey(0)
