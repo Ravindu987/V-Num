@@ -1,56 +1,50 @@
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
 import glob
 
 
-# Predict bounding boxes using the CNN and weights
-def localize(imgpath, dnn):
-
-    # Input image blob to dnn
-    img = cv2.imread(imgpath)
-    height, width, _ = img.shape
+# Localize plate in given video frame
+def localize(frame, dnn):
+    height, width, _ = frame.shape
     blob = cv2.dnn.blobFromImage(
-        img, 1/255, (416, 416), (0, 0, 0), swapRB=True, crop=False)
+        frame, 1/255, (416, 416), (0, 0, 0), swapRB=True, crop=False)
     dnn.setInput(blob)
     output_layer_names = dnn.getUnconnectedOutLayersNames()
     layer_outputs = dnn.forward(output_layer_names)
 
     boxes = []
     confidences = []
-    class_ids = []
 
-    # Get bounding boxes
     for output in layer_outputs:
         for detect in output:
-            scores = detect[5:]
-            class_id = np.argmax(scores)
-            confidence = scores[class_id]
+            confidence = detect[5]
             if confidence > 0.2:
-                center_x = float(detect[0] * width)
-                center_y = float(detect[1] * height)
-                w = float(detect[2] * width)
-                h = float(detect[3] * height)
-                x = float(center_x - w / 2)
-                y = float(center_y - h / 2)
+                center_x = int(detect[0] * width)
+                center_y = int(detect[1] * height)
+                w = int(detect[2] * width)
+                h = int(detect[3] * height)
+                x = int(center_x - w / 2)
+                y = int(center_y - h / 2)
 
                 boxes.append([x, y, w, h])
-                confidences.append((float(confidence)))
-                class_ids.append(class_id)
+                confidences.append(round(float(confidence), 2))
 
     indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.2, 0.4)
 
-    return indexes, boxes, confidences
+    ret_boxes = []
+    for i in indexes:
+        ret_boxes.append(boxes[i])
+
+    return ret_boxes
 
 
 # Predict bounding box coordinates
 def get_plate_coordinates(imgpath, dnn):
     coordinates = (0, 0, 0, 0)
-    indexes, boxes, confidences = localize(imgpath, dnn)
-    if len(indexes) > 0:
-        for i in indexes.flatten():
-            x, y, w, h = boxes[i]
-        coordinates = (x, y, w, h)
+    boxes = localize(imgpath, dnn)
+    if len(boxes) > 0:
+        for box in boxes:
+            coordinates = box
     return coordinates
 
 
@@ -78,13 +72,12 @@ def get_ious(image_paths, txt_paths, dnn):
     for i in range(len(image_paths)):
         prediction = get_plate_coordinates(image_paths[i], dnn)
         prediction = [round(val, 5) for val in prediction]
-        # print(prediction)
 
         img = cv2.imread(image_paths[i])
         height, width, _ = img.shape
         label = open(txt_paths[i]).readline().split()
         label = [float(x) for x in label]
-        # print(label)
+
         center_x = float(label[1] * width)
         center_y = float(label[2] * height)
         w = float(label[3] * width)
@@ -92,7 +85,6 @@ def get_ious(image_paths, txt_paths, dnn):
         x = float(center_x - w / 2)
         y = float(center_y - h / 2)
         gt_box = [x, y, w, h]
-        # print(gt_box)
 
         iou, intersection, union = intersection_over_union(gt_box, prediction)
         print(iou)
@@ -102,35 +94,32 @@ def get_ious(image_paths, txt_paths, dnn):
     return tests, ious
 
 
-# Define relative path for weights and configuration file
-weight_path = "./yolov4-train_final.weights"
-cfg_path = "./yolov4-train.cfg"
+if __name__ == "_main__":
+    # Define relative path for weights and configuration file
+    weight_path = "./yolov4-train_final.weights"
+    cfg_path = "./yolov4-train.cfg"
 
+    # Get image and text paths
+    image_paths = [file for file in glob.glob(
+        '../YOLO test data/*.jpg')]
+    txt_paths = [file for file in glob.glob('../YOLO test data/*.txt')]
+    image_paths.sort()
+    txt_paths.sort()
 
-# Get image and text paths
-image_paths = [file for file in glob.glob(
-    '../YOLO test data/*.jpg')]
-txt_paths = [file for file in glob.glob('../YOLO test data/*.txt')]
-image_paths.sort()
-txt_paths.sort()
-# print(image_paths)
-# print(txt_paths)
+    # Read dnn from weights and config file
+    dnn = cv2.dnn.readNet(weight_path, cfg_path)
 
-# Read dnn from weights and config file
-dnn = cv2.dnn.readNet(weight_path, cfg_path)
+    # Get IoU values for each test case
+    tests, ious = get_ious(image_paths, txt_paths, dnn)
+    mean = round(sum(ious)/len(tests), 2)
 
-# Get IoU values for each test case
-tests, ious = get_ious(image_paths, txt_paths, dnn)
-mean = round(sum(ious)/len(tests), 2)
-
-
-# Plot IoU values
-fig = plt.figure()
-iou = fig.add_subplot()
-iou.set_title("Yolo iou")
-iou.plot(tests, ious)
-iou.text(0.75, 0.25, "Mean: "+str(mean),
-         fontsize=10, transform=fig.transFigure)
-iou.set_xlabel("Tests")
-iou.set_ylabel("IoU")
-plt.show()
+    # Plot IoU values
+    fig = plt.figure()
+    iou = fig.add_subplot()
+    iou.set_title("Yolo iou")
+    iou.plot(tests, ious)
+    iou.text(0.75, 0.25, "Mean: "+str(mean),
+             fontsize=10, transform=fig.transFigure)
+    iou.set_xlabel("Tests")
+    iou.set_ylabel("IoU")
+    plt.show()

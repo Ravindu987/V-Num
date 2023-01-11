@@ -39,7 +39,7 @@ def localize(frame, dnn):
 
 
 # Predict bounding box
-def show_plate_video(frame, dnn):
+def draw_rectangle(frame, dnn):
     boxes = localize(frame, dnn)
     for box in boxes:
         x, y, w, h = box[0]
@@ -78,7 +78,7 @@ def run_multi_configs(cap):
             # Run detection according to relevant frequencies
             if j != 0:
                 if (i % freq == 0):
-                    show_plate_video(frame, dnn)
+                    draw_rectangle(frame, dnn)
 
             cv2.imshow('frame', frame)
 
@@ -114,6 +114,7 @@ def run_multi_configs(cap):
     plt.show()
 
 
+# Run detection every 100 frames
 def run_default(cap):
     i = 0
     while (True):
@@ -124,7 +125,7 @@ def run_default(cap):
 
         if (i % 100 == 0):
             t = time.time()
-            show_plate_video(frame, dnn)
+            draw_rectangle(frame, dnn)
             print(time.time() - t)
 
         cv2.imshow('frame', frame)
@@ -133,15 +134,15 @@ def run_default(cap):
             break
 
 
-# Run detections on video
-def run_each():
+# Run detections every frame
+def run_each(cap):
     i = 0
     while (True):
         # Capture frame-by-frame
         ret, frame = cap.read()
         frame = cv2.resize(frame, (1080, 720))
 
-        show_plate_video(frame, dnn)
+        draw_rectangle(frame, dnn)
 
         cv2.imshow('frame', frame)
         i += 1
@@ -168,6 +169,6 @@ if __name__ == "__main__":
     cap = cv2.VideoCapture(
         "./DataSet/Videos/KIC-1_Lane-04_1_20211213073000_20211213080000.avi")
 
-    # show_on_video()
+    # run_each(cap)
     # run_multi_configs(cap)
     run_default(cap)
