@@ -92,6 +92,19 @@ Folliwng are the results for Yolov3 and v4.
 ![Yolov4](https://user-images.githubusercontent.com/80534358/201687865-8870d744-1c49-4a1f-988f-72d56cc8847d.png)
 
 
+### Pipeline Architecture
+
+All three modules mentioned above must be implemented together in the final product.
+
+This is done via executing two scripts simultaneously. 
+
+1. Detector script - Runs the plate detector algorithm on the video and save the detected plates to the local storage as jpgs.
+2. Listener - The python API watchdog is used to listen for file additions in the specific directory. When the detector saves a new jpg in the directory the listener is triggered and event handler gets executed. The event handler feeds the new image to the character localization and character recognition algorithms.
+The characters read by the algorithms are currently written to a text file.
+
+To avoid duplicates, the text values are checked before writing to the text file.
+
+
 ### References
 
 1. ralhad Gavali, J. Saira Banu,
