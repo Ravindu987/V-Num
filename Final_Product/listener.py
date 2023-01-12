@@ -66,9 +66,9 @@ def get_letters(img):
 
     return letter_contours
 
+
+
 # Get prediction from cropped letter
-
-
 def get_prediction(img):
     img_array = tf.keras.utils.img_to_array(img)
     img_array = tf.expand_dims(img_array, 0)
