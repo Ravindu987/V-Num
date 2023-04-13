@@ -169,6 +169,6 @@ if __name__ == "__main__":
     cap = cv2.VideoCapture(
         "./DataSet/Videos/KIC-1_Lane-04_1_20211213073000_20211213080000.avi")
 
-    # run_each(cap)
+    run_each(cap)
     # run_multi_configs(cap)
-    run_default(cap)
+    # run_default(cap)

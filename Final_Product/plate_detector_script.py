@@ -5,7 +5,8 @@ import cv2
 def localize(frame, dnn):
     height, width, _ = frame.shape
     blob = cv2.dnn.blobFromImage(
-        frame, 1/255, (416, 416), (0, 0, 0), swapRB=True, crop=False)
+        frame, 1 / 255, (416, 416), (0, 0, 0), swapRB=True, crop=False
+    )
     dnn.setInput(blob)
     output_layer_names = dnn.getUnconnectedOutLayersNames()
     layer_outputs = dnn.forward(output_layer_names)
@@ -23,9 +24,9 @@ def localize(frame, dnn):
                 h = int(detect[3] * height)
                 x = int(center_x - w / 2)
                 y = int(center_y - h / 2)
-
-                boxes.append([x, y, w, h])
-                confidences.append(round(float(confidence), 2))
+                if x > 0 and y > 0:
+                    boxes.append([x, y, w, h])
+                    confidences.append(round(float(confidence), 2))
 
     # Run non max suppresion on bounding boxes
     indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.2, 0.4)
@@ -46,11 +47,19 @@ def show_plate_video(frame, dnn, name_counter):
             x, y, w, h = box[0]
             confidence = str(box[1])
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 255), 2)
-            cv2.putText(frame, "license plate " + confidence,
-                        (x, y + h + 40), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 1)
-            roi = frame[y:y+h, x:x+w]
-            rand = "detect"+str(name_counter)
-            cv2.imwrite("./Final_Product/cropped_plates/"+rand+".jpg", roi)
+            cv2.putText(
+                frame,
+                "license plate " + confidence,
+                (x, y + h + 40),
+                cv2.FONT_HERSHEY_PLAIN,
+                2,
+                (255, 255, 255),
+                1,
+            )
+            roi = frame[y : y + h, x : x + w]
+            rand = "detect" + str(name_counter)
+            print(x, y, w, h)
+            cv2.imwrite("./Final_Product/cropped_plates/" + rand + ".jpg", roi)
         return True
     return False
 
@@ -60,24 +69,25 @@ def run_default(cap, name_counter):
 
     # Set counters
     i = 0
-    j = 301
+    j = 201
 
-    while (True):
+    while True:
 
         # Capture frame-by-frame
         ret, frame = cap.read()
         frame = cv2.resize(frame, (1080, 720))
 
         # Run detection algorithm once evry 10 frames,
-        if (i % 10 == 0 and j > 300):
-            if show_plate_video(frame, dnn, name_counter):
+        if i % 10 == 0 and j > 200:
+            h, w, c = frame.shape
+            if show_plate_video(frame[h // 2 :, :, :], dnn, name_counter):
                 print(i, j)
                 j = 1
                 name_counter += 1
 
-        cv2.imshow('frame', frame)
+        cv2.imshow("frame", frame)
 
-        if cv2.waitKey(20) & 0xFF == ord('q'):
+        if cv2.waitKey(20) & 0xFF == ord("q"):
             break
 
         i += 1
@@ -105,7 +115,8 @@ if __name__ == "__main__":
     #     "./DataSet/Videos/KIC-1_Lane-04_1_20211213183000_20211213190000.avi")
 
     cap = cv2.VideoCapture(
-        "./DataSet/Videos/KIC-1_Lane-04_1_20211213073000_20211213080000.avi")
+        "./DataSet/Videos/KIC-1_Lane-04_1_20211213080000_20211213083000.avi"
+    )
 
     # show_on_video()
     run_default(cap, name_counter)

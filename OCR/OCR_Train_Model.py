@@ -62,7 +62,7 @@ model.compile(
 )
 
 
-checkpoint_path = "./Character Recognition Weights/model_mixed_9.hdf5"
+checkpoint_path = "./Character Recognition Weights/model_mixed_11.hdf5"
 checkpoint = ModelCheckpoint(
     filepath=checkpoint_path,
     save_best_only=True,
