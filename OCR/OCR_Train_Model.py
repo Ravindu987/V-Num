@@ -7,17 +7,14 @@ from keras.losses import SparseCategoricalCrossentropy
 # Load data from train and test sets
 def load_data(data_path):
     train_ds = tf.keras.utils.image_dataset_from_directory(
-        data_path+"backup",
+        directory=data_path + "train",
         image_size=(128, 128),
         seed=123,
-        batch_size=16
+        batch_size=16,
     )
 
     val_ds = tf.keras.utils.image_dataset_from_directory(
-        data_path+"val",
-        image_size=(128, 128),
-        seed=123,
-        batch_size=16
+        directory=data_path + "val", image_size=(128, 128), seed=123, batch_size=16
     )
 
     return train_ds, val_ds
@@ -27,52 +24,48 @@ train_ds, val_ds = load_data("./Train Character Data/")
 
 class_names = train_ds.class_names
 
-print(class_names)
-# show_data_sample(train_ds, class_names)
-
-for image_batch, labels_batch in train_ds:
-    print(image_batch.shape)
-    print(labels_batch.shape)
-    break
-
 num_classes = len(class_names)
 
 # Define model
-model = tf.keras.Sequential([
-    Rescaling(1./255),
-    Conv2D(32, 5, activation='relu'),
-    MaxPooling2D(pool_size=2, strides=2),
-    Conv2D(64, 5, activation='relu'),
-    MaxPooling2D(pool_size=2, strides=2),
-    Conv2D(128, 5, activation='relu'),
-    MaxPooling2D(pool_size=2, strides=2),
-    Conv2D(256, 5, activation='relu'),
-    MaxPooling2D(pool_size=2, strides=2),
-    Flatten(),
-    Dense(128, activation='relu'),
-    Dense(64, activation='relu'),
-    Dense(num_classes, activation='softmax')
-])
-
-
-model.compile(
-    optimizer='adam',
-    loss=SparseCategoricalCrossentropy(from_logits=True),
-    metrics=['accuracy']
+model = tf.keras.Sequential(
+    [
+        Rescaling(1.0 / 255),
+        Conv2D(32, 5, activation="relu"),
+        MaxPooling2D(pool_size=2, strides=2),
+        Conv2D(64, 5, activation="relu"),
+        MaxPooling2D(pool_size=2, strides=2),
+        Conv2D(128, 5, activation="relu"),
+        MaxPooling2D(pool_size=2, strides=2),
+        Conv2D(256, 5, activation="relu"),
+        MaxPooling2D(pool_size=2, strides=2),
+        Flatten(),
+        Dense(128, activation="relu"),
+        Dense(64, activation="relu"),
+        Dense(num_classes, activation="softmax"),
+    ]
 )
 
-
-checkpoint_path = "./Character Recognition Weights/model_mixed_11.hdf5"
+checkpoint_path = "./Character Recognition Weights/model_on_target_data_2.hdf5"
 checkpoint = ModelCheckpoint(
     filepath=checkpoint_path,
     save_best_only=True,
-    verbose=1
+    monitor="val_accuracy",
+    mode="max",
+    verbose=1,
 )
 
-early_stop = EarlyStopping(
-    monitor="val_loss"
+early_stopping = EarlyStopping(
+    monitor="val_accuracy", patience=2, mode="max", verbose=1
 )
 
 
-model.fit(train_ds, validation_data=val_ds, epochs=5,
-          callbacks=[checkpoint, early_stop])
+model.compile(
+    optimizer="adam",
+    loss=SparseCategoricalCrossentropy(from_logits=True),
+    metrics=["accuracy"],
+)
+
+
+model.fit(
+    train_ds, validation_data=val_ds, epochs=15, callbacks=[checkpoint, early_stopping]
+)

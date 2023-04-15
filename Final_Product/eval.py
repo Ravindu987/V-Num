@@ -22,7 +22,7 @@ def eval(correct_ids, actual_ids):
 if __name__ == "__main__":
     correct_path = "./Final_Product/Correct_Plates.txt"
     correct_ids = read_correct(correct_path)
-    actual_path = "./Final_Product/cropped_plates/Plates_Only.txt"
+    actual_path = "./Final_Product/Test_Plates.txt"
     actual_ids = read_actual(actual_path)
 
     score = eval(correct_ids, actual_ids)

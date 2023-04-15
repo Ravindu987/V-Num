@@ -15,32 +15,34 @@ def y_cord_contour(contours):
 
 
 def sort_contours(contours):
-
     contours_boxes = [list(cv.boundingRect(contour)) for contour in contours]
 
     for i in range(len(contours_boxes)):
         contours_boxes[i].append(i)
 
     c = np.array(contours_boxes)
-    max_height = np.max(c[:, 3])
+    if len(c[:] > 0):
+        max_height = np.max(c[:, 3])
 
-    # Sort the contours by y-value
-    by_y = sorted(contours_boxes, key=lambda x: x[1])  # y values
+        # Sort the contours by y-value
+        by_y = sorted(contours_boxes, key=lambda x: x[1])  # y values
 
-    line_y = by_y[0][1]  # first y
-    line = 1
-    by_line = []
+        line_y = by_y[0][1]  # first y
+        line = 1
+        by_line = []
 
-    # Assign a line number to each contour
-    for x, y, w, h, i in by_y:
-        if y > line_y + 2 * max_height / 3:
-            line_y = y
-            line += 1
+        # Assign a line number to each contour
+        for x, y, w, h, i in by_y:
+            if y > line_y + 2 * max_height / 3:
+                line_y = y
+                line += 1
 
-        by_line.append((line, x, y, w, h, i))
+            by_line.append((line, x, y, w, h, i))
 
-    # This will now sort automatically by line then by x
-    return [i for line, x, y, w, h, i in sorted(by_line)]
+        # This will now sort automatically by line then by x
+        return [i for line, x, y, w, h, i in sorted(by_line)]
+
+    return []
 
 
 # Filter contours with size ratio to drop too small and too large contours
@@ -64,7 +66,6 @@ def filter_contours(contours, img):
 # eliminate contours with overlap
 def filter_contours_without_overlap(contours, hierarchy, img):
     filtered_contours = []
-    filtered_contours_no_overlap = []
     indexes = []
 
     for i in range(len(contours)):
@@ -97,25 +98,29 @@ def filter_contours_without_overlap(contours, hierarchy, img):
 # Preprocess image and find contours
 def find_contours(img, path):
     gray = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
-    # perform gaussian blur to smoothen image
-    blur = cv.GaussianBlur(gray, (3, 3), 0)
-    # threshold the image using Otsus method to preprocess for tesseract
-    ret, thresh = cv.threshold(blur, 100, 255, cv.THRESH_BINARY_INV)
-    # create rectangular kernel for dilation
-    rect_kern = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    # apply dilation to make regions more clear
-    dilation = cv.dilate(thresh, rect_kern, iterations=2)
-    # find contours of regions of interest within license plate
+    # ret, thresh = cv.threshold(gray, 100, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
+    # thresh = cv.adaptiveThreshold(gray,255,cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY,15,4)
+    noise_reduced = cv.fastNlMeansDenoising(gray, None, h=7, searchWindowSize=31)
+    thresh = cv.adaptiveThreshold(
+        noise_reduced, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 19, 6
+    )
+
+    erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    eroded = cv.erode(thresh, erode_kernel)
+
+    dilate_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7, 7))
+    dilated = cv.dilate(eroded, dilate_kernel)
+
     try:
         contours, hierarchy = cv.findContours(
-            dilation, cv.RETR_CCOMP, cv.CHAIN_APPROX_NONE
+            dilated, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
         )
     except:
         ret_img, contours, hierarchy = cv.findContours(
-            dilation, cv.RETR_CCOMP, cv.CHAIN_APPROX_NONE
+            thresh, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
         )
 
-    sorted_contours = filter_contours(contours, img)
+    sorted_contours = filter_contours_without_overlap(contours, hierarchy, img)
 
     # for contour in sorted_contours:
     #     blank = np.zeros((img.shape[0],img.shape[1],3), dtype='uint8') + 255
@@ -137,17 +142,22 @@ def find_contours(img, path):
 # Save detected character as jpg
 def save_contours(contours, img_size, path, img):
     i = 1
+    prefix = path.split(".")[0][6:]
+    print(prefix)
     for contour in contours:
         x, y, w, h = cv.boundingRect(contour)
-        roi_img = img[y : y + h + 6, x : x + w + 6]
-        prefix = path.split(".")[0][7:]
-        cv.imwrite("./Cropped Letters Orig/L" + prefix + str(i) + ".jpg", roi_img)
+        roi_image = img[y - 3 : y + h + 3, x - 3 : x + w + 3]
+        roi_image = cv.resize(roi_image, dsize=(128, 128), interpolation=cv.INTER_CUBIC)
+        cv.imwrite(
+            "./Cropped Letters/Video 19/v19_" + prefix + "_" + str(i) + ".jpg",
+            roi_image,
+        )
         i += 1
 
 
 # Upsample image
 def upscale_image(imgpath, sr):
-    img = cv.imread("./Cropped License Plates/" + imgpath)
+    img = cv.imread("./Cropped License Plates/Video 1/" + imgpath)
     upsampled = sr.upsample(img)
     return upsampled
 
@@ -165,7 +175,7 @@ if __name__ == "__main__":
     sr.readModel(path)
     sr.setModel("edsr", 2)
 
-    image_list = os.listdir("./Cropped License Plates")
+    image_list = os.listdir("./Cropped License Plates/Video 1")
 
     for image_path in image_list:
         find_characters(image_path, sr)

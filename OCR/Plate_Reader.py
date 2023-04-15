@@ -22,6 +22,7 @@ def get_characters(img):
     # Image Preprocessing
     # img = cv.copyMakeBorder(img, 5, 5, 5, 5, cv.BORDER_REFLECT)
     gray = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
+    # blur = cv.GaussianBlur(gray, (3, 3), 0)
     # ret, thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
     # thresh = cv.adaptiveThreshold(gray,255,cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY,15,4)
     thresh = cv.adaptiveThreshold(
@@ -30,10 +31,29 @@ def get_characters(img):
     cv.imshow("Binary", thresh)
     cv.waitKey(0)
 
+    noise = cv.fastNlMeansDenoising(gray, None, h=7, searchWindowSize=31)
+    thresh2 = cv.adaptiveThreshold(
+        noise, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 25, 2
+    )
+    cv.imshow("Binary2", thresh2)
+    cv.waitKey(0)
+
+    erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    eroded = cv.erode(thresh2, erode_kernel)
+
+    cv.imshow("Eroded", eroded)
+    cv.waitKey(0)
+
+    dilate_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7, 7))
+    eroded = cv.dilate(eroded, dilate_kernel)
+
+    cv.imshow("Eroded", eroded)
+    cv.waitKey(0)
+
     # find contours of regions of interest within license plate
     try:
         contours, hierarchy = cv.findContours(
-            thresh, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
+            eroded, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
         )
     except:
         ret_img, contours, hierarchy = cv.findContours(
@@ -97,7 +117,7 @@ classes = [
 ]
 
 ocr_model = tf.keras.models.load_model(
-    "./Character Recognition Weights/model_mixed_11.hdf5", compile=False
+    "./Character Recognition Weights/model_on_target_data_2.hdf5", compile=False
 )
 
 ocr_model.compile(
@@ -113,9 +133,10 @@ sr.readModel(path)
 sr.setModel("edsr", 3)
 
 
-img = cv.imread("./Final_Product/cropped_plates/detect84.jpg")
+img = cv.imread("./Final_Product/cropped_plates/detect79.jpg")
+cv.imshow("Original", img)
 upsampled = sr.upsample(img)
-cv.imshow("Plate", upsampled)
+cv.imshow("Plate-Upsampled", upsampled)
 cv.waitKey(0)
 
 

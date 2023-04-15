@@ -5,6 +5,7 @@ import numpy as np
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 from keras.losses import SparseCategoricalCrossentropy
+import os
 
 
 # Write text to file
@@ -88,7 +89,7 @@ def get_letters(img):
     # thresh = cv.adaptiveThreshold(gray,255,cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY,15,4)
     noise_reduced = cv.fastNlMeansDenoising(gray, None, h=7, searchWindowSize=31)
     thresh = cv.adaptiveThreshold(
-        noise_reduced, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 19, 6
+        noise_reduced, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 25, 2
     )
 
     erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
@@ -161,11 +162,18 @@ def plate_read(img_path):
     print(id)
 
     WriteToFile(
-        "./Final_Product/cropped_plates/Plates.txt",
-        "./Final_Product/cropped_plates/Plates_Only.txt",
+        "./Final_Product/Test_Plates_Only.txt",
+        "./Final_Product/Test_Plates.txt",
         img_path,
         id,
     )
+
+
+def numerical_sort_key(file_name):
+    # extract the numeric portion of the file name
+    numeric_part = file_name.split(".")[0][6:]
+    # convert the numeric part to an integer
+    return int(numeric_part)
 
 
 # Listener class
@@ -258,7 +266,7 @@ if __name__ == "__main__":
     ]
 
     ocr_model = tf.keras.models.load_model(
-        "./Character Recognition Weights/model_val_accuracy.hdf5", compile=False
+        "./Character Recognition Weights/model_on_target_data_2.hdf5", compile=False
     )
 
     ocr_model.compile(
@@ -273,13 +281,13 @@ if __name__ == "__main__":
     sr.readModel(path)
     sr.setModel("edsr", 3)
 
-    event_handler = MonitorFolder((["*.jpg"]))
-    observer = Observer()
-    observer.schedule(event_handler, folder_path, True)
-    observer.start()
-    try:
-        while True:
-            sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-        observer.join()
+    img_list = [
+        f for f in os.listdir("./Final_Product/cropped_plates") if f.endswith(".jpg")
+    ]
+    img_list.sort(key=numerical_sort_key)
+    for img_name in img_list:
+        img_path = os.path.join("./Final_Product/cropped_plates/", img_name)
+        plate_read(img_path)
+
+        if img_name == "detect115.jpg":
+            break

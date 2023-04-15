@@ -4,10 +4,12 @@ import glob
 
 
 # Localize plate in given video frame
-def localize(frame, dnn):
+def localize(imgpath, dnn):
+    frame = cv2.imread(imgpath)
     height, width, _ = frame.shape
     blob = cv2.dnn.blobFromImage(
-        frame, 1/255, (416, 416), (0, 0, 0), swapRB=True, crop=False)
+        frame, 1 / 255, (416, 416), (0, 0, 0), swapRB=True, crop=False
+    )
     dnn.setInput(blob)
     output_layer_names = dnn.getUnconnectedOutLayersNames()
     layer_outputs = dnn.forward(output_layer_names)
@@ -50,10 +52,11 @@ def get_plate_coordinates(imgpath, dnn):
 
 # Func to calculate IoU
 def intersection_over_union(gt_box, pred_box):
-    inter_box_top_left = [max(gt_box[0], pred_box[0]),
-                          max(gt_box[1], pred_box[1])]
-    inter_box_bottom_right = [min(gt_box[0]+gt_box[2], pred_box[0]+pred_box[2]),
-                              min(gt_box[1]+gt_box[3], pred_box[1]+pred_box[3])]
+    inter_box_top_left = [max(gt_box[0], pred_box[0]), max(gt_box[1], pred_box[1])]
+    inter_box_bottom_right = [
+        min(gt_box[0] + gt_box[2], pred_box[0] + pred_box[2]),
+        min(gt_box[1] + gt_box[3], pred_box[1] + pred_box[3]),
+    ]
 
     inter_box_w = inter_box_bottom_right[0] - inter_box_top_left[0]
     inter_box_h = inter_box_bottom_right[1] - inter_box_top_left[1]
@@ -87,22 +90,21 @@ def get_ious(image_paths, txt_paths, dnn):
         gt_box = [x, y, w, h]
 
         iou, intersection, union = intersection_over_union(gt_box, prediction)
-        print(iou)
+        print(f"IoU for the {i}th plate: {iou}")
         tests.append(i)
         ious.append(iou)
 
     return tests, ious
 
 
-if __name__ == "_main__":
+if __name__ == "__main__":
     # Define relative path for weights and configuration file
-    weight_path = "./yolov4-train_final.weights"
-    cfg_path = "./yolov4-train.cfg"
+    weight_path = "./YOLO localize plate/yolov4-train_final.weights"
+    cfg_path = "./YOLO localize plate/yolov4-train.cfg"
 
     # Get image and text paths
-    image_paths = [file for file in glob.glob(
-        '../YOLO test data/*.jpg')]
-    txt_paths = [file for file in glob.glob('../YOLO test data/*.txt')]
+    image_paths = [file for file in glob.glob("./YOLO Test data/*.jpg")]
+    txt_paths = [file for file in glob.glob("./YOLO Test data/*.txt")]
     image_paths.sort()
     txt_paths.sort()
 
@@ -111,15 +113,14 @@ if __name__ == "_main__":
 
     # Get IoU values for each test case
     tests, ious = get_ious(image_paths, txt_paths, dnn)
-    mean = round(sum(ious)/len(tests), 2)
+    mean = round(sum(ious) / len(tests), 2)
 
     # Plot IoU values
     fig = plt.figure()
     iou = fig.add_subplot()
-    iou.set_title("Yolo iou")
+    iou.set_title("Yolo IoU")
     iou.plot(tests, ious)
-    iou.text(0.75, 0.25, "Mean: "+str(mean),
-             fontsize=10, transform=fig.transFigure)
+    iou.text(0.75, 0.25, "Mean: " + str(mean), fontsize=10, transform=fig.transFigure)
     iou.set_xlabel("Tests")
     iou.set_ylabel("IoU")
     plt.show()

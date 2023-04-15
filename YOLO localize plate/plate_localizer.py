@@ -8,7 +8,8 @@ def localize(imgpath, dnn):
     img = cv2.imread(imgpath)
     height, width, _ = img.shape
     blob = cv2.dnn.blobFromImage(
-        img, 1/255, (416, 416), (0, 0, 0), swapRB=True, crop=False)
+        img, 1 / 255, (416, 416), (0, 0, 0), swapRB=True, crop=False
+    )
     dnn.setInput(blob)
     output_layer_names = dnn.getUnconnectedOutLayersNames()
     layer_outputs = dnn.forward(output_layer_names)
@@ -48,8 +49,15 @@ def show_plate(imgpath, dnn):
             x, y, w, h = boxes[i]
             confidence = str(round(confidences[i], 2))
             cv2.rectangle(temp_img, (x, y), (x + w, y + h), (255, 255, 255), 2)
-            cv2.putText(temp_img, "license plate " + confidence,
-                        (x, y + h + 40), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 1)
+            cv2.putText(
+                temp_img,
+                "license plate " + confidence,
+                (x, y + h + 40),
+                cv2.FONT_HERSHEY_PLAIN,
+                2,
+                (255, 255, 255),
+                1,
+            )
         coordinates = (x, y, w, h)
     plt.figure(figsize=(24, 24))
     plt.imshow(cv2.cvtColor(temp_img, cv2.COLOR_BGR2RGB))
@@ -74,15 +82,27 @@ def show_plate_with_orig(imgpath, txtpath, dnn):
     gt_box = [x, y, w, h]
     print(gt_box)
 
-    cv2.rectangle(temp_img, (int(gt_box[0]), int(gt_box[1])), (int(
-        gt_box[0])+int(gt_box[2]), int(gt_box[1])+int(gt_box[3])), (255, 0, 0), 2)
+    cv2.rectangle(
+        temp_img,
+        (int(gt_box[0]), int(gt_box[1])),
+        (int(gt_box[0]) + int(gt_box[2]), int(gt_box[1]) + int(gt_box[3])),
+        (255, 0, 0),
+        2,
+    )
     if len(indexes) > 0:
         for i in indexes.flatten():
             x, y, w, h = boxes[i]
             confidence = str(round(confidences[i], 2))
             cv2.rectangle(temp_img, (x, y), (x + w, y + h), (255, 255, 255), 2)
-            cv2.putText(temp_img, "license plate " + confidence,
-                        (x, y + h + 40), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 1)
+            cv2.putText(
+                temp_img,
+                "license plate " + confidence,
+                (x, y + h + 40),
+                cv2.FONT_HERSHEY_PLAIN,
+                2,
+                (255, 255, 255),
+                1,
+            )
         coordinates = (x, y, w, h)
 
     prediction = get_plate_coordinates(imgpath, dnn)
@@ -121,10 +141,11 @@ def show_plate_all_with_orig(image_paths, text_paths, dnn):
 
 
 def intersection_over_union(gt_box, pred_box):
-    inter_box_top_left = [max(gt_box[0], pred_box[0]),
-                          max(gt_box[1], pred_box[1])]
-    inter_box_bottom_right = [min(gt_box[0]+gt_box[2], pred_box[0]+pred_box[2]),
-                              min(gt_box[1]+gt_box[3], pred_box[1]+pred_box[3])]
+    inter_box_top_left = [max(gt_box[0], pred_box[0]), max(gt_box[1], pred_box[1])]
+    inter_box_bottom_right = [
+        min(gt_box[0] + gt_box[2], pred_box[0] + pred_box[2]),
+        min(gt_box[1] + gt_box[3], pred_box[1] + pred_box[3]),
+    ]
 
     inter_box_w = inter_box_bottom_right[0] - inter_box_top_left[0]
     inter_box_h = inter_box_bottom_right[1] - inter_box_top_left[1]
@@ -168,9 +189,8 @@ def crop_all(image_paths, dnn):
         if (x, y, w, h) != (0, 0, 0, 0):
             img = cv2.imread(image_path)
             img_copy = img.copy()
-            cropped = img_copy[y:y+h, x:x+w]
-            cv2.imwrite('./Cropped License Plates/detected' +
-                        str(i)+'.jpg', cropped)
+            cropped = img_copy[y : y + h, x : x + w]
+            cv2.imwrite("./Cropped License Plates/detected" + str(i) + ".jpg", cropped)
             i += 1
 
 
@@ -180,10 +200,8 @@ cfg_path = "./YOLO localize plate/yolov4-train.cfg"
 
 
 # Get image paths
-image_paths = [file for file in glob.glob(
-    './DataSet/Images/*.jpg')]
-txt_paths = [file for file in glob.glob(
-    './YOLO test data/*.txt') if file != './YOLO test data/classes.txt']
+image_paths = [file for file in glob.glob("./YOLO Test data/*.jpg")]
+txt_paths = [file for file in glob.glob("./YOLO Test data/*.txt")]
 image_paths.sort()
 txt_paths.sort()
 # print(image_paths)
@@ -192,8 +210,8 @@ txt_paths.sort()
 # Read dnn from weights and config file
 dnn = cv2.dnn.readNet(weight_path, cfg_path)
 
-crop_all(image_paths, dnn)
+# crop_all(image_paths, dnn)
 # show_plate_all(image_paths, dnn)
 # show_plate_cropped(image_files)
-# iou_all(image_paths, txt_paths, dnn)
+iou_all(image_paths, txt_paths, dnn)
 # show_plate_all_with_orig(image_paths, txt_paths, dnn)
