@@ -39,18 +39,17 @@ model = tf.keras.Sequential(
         Conv2D(256, 5, activation="relu"),
         MaxPooling2D(pool_size=2, strides=2),
         Flatten(),
+        Dense(256, activation="relu"),
         Dense(128, activation="relu"),
-        Dense(64, activation="relu"),
         Dense(num_classes, activation="softmax"),
     ]
 )
 
-checkpoint_path = "./Character Recognition Weights/model_on_target_data_2.hdf5"
+checkpoint_path = "./Character Recognition Weights/model_on_target_data_4.hdf5"
 checkpoint = ModelCheckpoint(
     filepath=checkpoint_path,
     save_best_only=True,
-    monitor="val_accuracy",
-    mode="max",
+    monitor="val_loss",
     verbose=1,
 )
 

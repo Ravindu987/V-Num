@@ -146,6 +146,9 @@ def plate_read(img_path):
         if ind != -1:
             id += classes[ind]
 
+    if id == "":
+        return
+
     if len(id) == 6:
         id = id[:2].replace("0", "O") + id[2:]
         id = id[:2].replace("1", "I") + id[2:]
@@ -266,7 +269,7 @@ if __name__ == "__main__":
     ]
 
     ocr_model = tf.keras.models.load_model(
-        "./Character Recognition Weights/model_on_target_data_2.hdf5", compile=False
+        "./Character Recognition Weights/model_on_target_data_3.hdf5", compile=False
     )
 
     ocr_model.compile(
@@ -282,11 +285,11 @@ if __name__ == "__main__":
     sr.setModel("edsr", 3)
 
     img_list = [
-        f for f in os.listdir("./Final_Product/cropped_plates") if f.endswith(".jpg")
+        f for f in os.listdir("./Cropped License Plates/Video 19") if f.endswith(".jpg")
     ]
     img_list.sort(key=numerical_sort_key)
     for img_name in img_list:
-        img_path = os.path.join("./Final_Product/cropped_plates/", img_name)
+        img_path = os.path.join("./Cropped License Plates/Video 19/", img_name)
         plate_read(img_path)
 
         if img_name == "detect115.jpg":

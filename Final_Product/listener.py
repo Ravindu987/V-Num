@@ -88,7 +88,7 @@ def get_letters(img):
     # thresh = cv.adaptiveThreshold(gray,255,cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY,15,4)
     noise_reduced = cv.fastNlMeansDenoising(gray, None, h=7, searchWindowSize=31)
     thresh = cv.adaptiveThreshold(
-        noise_reduced, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 19, 6
+        noise_reduced, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 25, 2
     )
 
     erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
@@ -103,7 +103,7 @@ def get_letters(img):
         )
     except:
         ret_img, contours, hierarchy = cv.findContours(
-            thresh, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
+            dilated, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
         )
 
     sorted_contours = filter_contours_without_overlap(contours, hierarchy, img)

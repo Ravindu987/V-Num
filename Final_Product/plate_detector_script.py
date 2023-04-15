@@ -66,13 +66,11 @@ def show_plate_video(frame, dnn, name_counter):
 
 # Default settings for plate detection
 def run_default(cap, name_counter):
-
     # Set counters
     i = 0
     j = 201
 
     while True:
-
         # Capture frame-by-frame
         ret, frame = cap.read()
         frame = cv2.resize(frame, (1080, 720))
@@ -99,7 +97,6 @@ def run_default(cap, name_counter):
 
 
 if __name__ == "__main__":
-
     # Define relative path for weights and configuration file
     weight_path = "./YOLO localize plate/yolov4-train_final.weights"
     cfg_path = "./YOLO localize plate/yolov4-train.cfg"
@@ -114,9 +111,7 @@ if __name__ == "__main__":
     # cap = cv2.VideoCapture(
     #     "./DataSet/Videos/KIC-1_Lane-04_1_20211213183000_20211213190000.avi")
 
-    cap = cv2.VideoCapture(
-        "./DataSet/Videos/KIC-1_Lane-04_1_20211213080000_20211213083000.avi"
-    )
+    cap = cv2.VideoCapture("./DataSet/Videos/Video 18.avi")
 
     # show_on_video()
     run_default(cap, name_counter)

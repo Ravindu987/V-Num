@@ -102,7 +102,7 @@ def find_contours(img, path):
     # thresh = cv.adaptiveThreshold(gray,255,cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY,15,4)
     noise_reduced = cv.fastNlMeansDenoising(gray, None, h=7, searchWindowSize=31)
     thresh = cv.adaptiveThreshold(
-        noise_reduced, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 19, 6
+        noise_reduced, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 25, 2
     )
 
     erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
@@ -117,7 +117,7 @@ def find_contours(img, path):
         )
     except:
         ret_img, contours, hierarchy = cv.findContours(
-            thresh, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
+            dilated, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
         )
 
     sorted_contours = filter_contours_without_overlap(contours, hierarchy, img)
@@ -142,14 +142,14 @@ def find_contours(img, path):
 # Save detected character as jpg
 def save_contours(contours, img_size, path, img):
     i = 1
-    prefix = path.split(".")[0][6:]
+    prefix = path.split("/")[-1].split(".")[0][6:]
     print(prefix)
     for contour in contours:
         x, y, w, h = cv.boundingRect(contour)
         roi_image = img[y - 3 : y + h + 3, x - 3 : x + w + 3]
         roi_image = cv.resize(roi_image, dsize=(128, 128), interpolation=cv.INTER_CUBIC)
         cv.imwrite(
-            "./Cropped Letters/Video 19/v19_" + prefix + "_" + str(i) + ".jpg",
+            "./Cropped Letters/Video 18/v18_" + prefix + "_" + str(i) + ".jpg",
             roi_image,
         )
         i += 1
@@ -157,7 +157,7 @@ def save_contours(contours, img_size, path, img):
 
 # Upsample image
 def upscale_image(imgpath, sr):
-    img = cv.imread("./Cropped License Plates/Video 1/" + imgpath)
+    img = cv.imread(imgpath)
     upsampled = sr.upsample(img)
     return upsampled
 
@@ -175,9 +175,11 @@ if __name__ == "__main__":
     sr.readModel(path)
     sr.setModel("edsr", 2)
 
-    image_list = os.listdir("./Cropped License Plates/Video 1")
+    src_path = "./Cropped License Plates/Video 18/"
+    image_list = os.listdir(src_path)
 
     for image_path in image_list:
+        image_path = os.path.join(src_path, image_path)
         find_characters(image_path, sr)
         # upscaled = upscale_image("./Cropped_New/"+image_path, sr)
 
