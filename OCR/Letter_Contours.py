@@ -71,16 +71,38 @@ def filter_contours_without_overlap(contours, hierarchy, img):
     for i in range(len(contours)):
         x, y, w, h = cv.boundingRect(contours[i])
         height, width, channels = img.shape
-        if h / height < 0.2 or w / width < 0.05 or h / height > 0.75 or w / width > 0.4:
-            continue
-        elif h / height < 0.325 and w / width < 0.325:
-            continue
-        elif y > height * 0.6:
-            continue
+        if width / height > 2:
+            if (
+                h / height < 0.3
+                or w / width < 0.05
+                or h / height > 0.8
+                or w / width > 0.15
+            ):
+                continue
+            elif h / height < 0.325 and w / width < 0.325:
+                continue
+            elif y > height * 0.6:
+                continue
+            else:
+                print(h / height, w / width)
+                # filtered_contours.append(contours[i])
+                indexes.append(i)
         else:
-            print(h / height, w / width)
-            # filtered_contours.append(contours[i])
-            indexes.append(i)
+            if (
+                h / height < 0.2
+                or w / width < 0.1
+                or h / height > 0.6
+                or w / width > 0.4
+            ):
+                continue
+            elif h / height < 0.325 and w / width < 0.325:
+                continue
+            elif y > height * 0.7:
+                continue
+            else:
+                print(h / height, w / width)
+                # filtered_contours.append(contours[i])
+                indexes.append(i)
 
     for index in indexes:
         if hierarchy[0][index][3] in indexes:

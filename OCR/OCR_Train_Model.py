@@ -40,7 +40,7 @@ model = tf.keras.Sequential(
         MaxPooling2D(pool_size=2, strides=2),
         Flatten(),
         Dense(256, activation="relu"),
-        Dense(128, activation="relu"),
+        Dense(100, activation="relu"),
         Dense(num_classes, activation="softmax"),
     ]
 )
@@ -53,9 +53,7 @@ checkpoint = ModelCheckpoint(
     verbose=1,
 )
 
-early_stopping = EarlyStopping(
-    monitor="val_accuracy", patience=2, mode="max", verbose=1
-)
+early_stopping = EarlyStopping(monitor="val_loss", patience=2, verbose=1)
 
 
 model.compile(

@@ -44,10 +44,10 @@ def get_characters(img):
     cv.imshow("Eroded", eroded)
     cv.waitKey(0)
 
-    dilate_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7, 7))
-    eroded = cv.dilate(eroded, dilate_kernel)
+    dilate_kernel = cv.getStructuringElement(cv.MORPH_RECT, (7, 7))
+    dilated = cv.dilate(eroded, dilate_kernel)
 
-    cv.imshow("Eroded", eroded)
+    cv.imshow("dilated", dilated)
     cv.waitKey(0)
 
     # find contours of regions of interest within license plate
@@ -117,7 +117,7 @@ classes = [
 ]
 
 ocr_model = tf.keras.models.load_model(
-    "./Character Recognition Weights/model_on_target_data_2.hdf5", compile=False
+    "./Character Recognition Weights/model_on_target_data_4.hdf5", compile=False
 )
 
 ocr_model.compile(
@@ -132,8 +132,8 @@ path = "./OCR/EDSR_x3.pb"
 sr.readModel(path)
 sr.setModel("edsr", 3)
 
-
-img = cv.imread("./Final_Product/cropped_plates/detect79.jpg")
+img = cv.imread("./Final_Product/cropped_plates/detect3.jpg")
+# img = cv.imread("./Cropped License Plates/Video 19/detect60.jpg")
 cv.imshow("Original", img)
 upsampled = sr.upsample(img)
 cv.imshow("Plate-Upsampled", upsampled)

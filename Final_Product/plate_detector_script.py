@@ -56,7 +56,7 @@ def show_plate_video(frame, dnn, name_counter):
                 (255, 255, 255),
                 1,
             )
-            roi = frame[y : y + h, x : x + w]
+            roi = frame[y - 2 : y + h + 2, x - 3 : x + w + 3]
             rand = "detect" + str(name_counter)
             print(x, y, w, h)
             cv2.imwrite("./Final_Product/cropped_plates/" + rand + ".jpg", roi)
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     # cap = cv2.VideoCapture(
     #     "./DataSet/Videos/KIC-1_Lane-04_1_20211213183000_20211213190000.avi")
 
-    cap = cv2.VideoCapture("./DataSet/Videos/Video 18.avi")
+    cap = cv2.VideoCapture("./DataSet/Videos/Video 20.avi")
 
     # show_on_video()
     run_default(cap, name_counter)

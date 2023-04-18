@@ -72,7 +72,6 @@ def show_plate_with_orig(imgpath, txtpath, dnn):
     indexes, boxes, confidences = localize(imgpath, dnn)
     label = open(txtpath).readline().split()
     label = [float(x) for x in label]
-    print(label)
     center_x = int(label[1] * width)
     center_y = int(label[2] * height)
     w = int(label[3] * width)
@@ -80,7 +79,6 @@ def show_plate_with_orig(imgpath, txtpath, dnn):
     x = int(center_x - w / 2)
     y = int(center_y - h / 2)
     gt_box = [x, y, w, h]
-    print(gt_box)
 
     cv2.rectangle(
         temp_img,
@@ -108,7 +106,7 @@ def show_plate_with_orig(imgpath, txtpath, dnn):
     prediction = get_plate_coordinates(imgpath, dnn)
     prediction = [round(val, 5) for val in prediction]
     iou, intersection, union = intersection_over_union(gt_box, prediction)
-    print(iou, intersection, union)
+    print(iou)
 
     plt.figure(figsize=(24, 24))
     plt.imshow(cv2.cvtColor(temp_img, cv2.COLOR_BGR2RGB))
@@ -213,5 +211,5 @@ dnn = cv2.dnn.readNet(weight_path, cfg_path)
 # crop_all(image_paths, dnn)
 # show_plate_all(image_paths, dnn)
 # show_plate_cropped(image_files)
-iou_all(image_paths, txt_paths, dnn)
-# show_plate_all_with_orig(image_paths, txt_paths, dnn)
+# iou_all(image_paths, txt_paths, dnn)
+show_plate_all_with_orig(image_paths, txt_paths, dnn)
