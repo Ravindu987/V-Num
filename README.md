@@ -38,13 +38,13 @@ Due to the nature of the license plate it is inefficient to read the entire numb
   - This is not computationally expensive.
 - Localization
   - Achieved using the following image processing techniques.
-  - Grayscaling
-  - Adaptive Gaussian Thresholding with 25 pixel kernel
-  - Noise reduction
-  - Dilate to fill small gaps
-  - Erode to isolate letters
-  - Contour detection was done
-  - Smaller and larger contours were filtered out. The aspect ratios were calculated based on dimensions of the plate
+    - Grayscaling
+    - Adaptive Gaussian Thresholding with 25 pixel kernel
+    - Noise reduction
+    - Dilate to fill small gaps
+    - Erode to isolate letters
+    - Contour detection
+  - Smaller and larger contours were filtered out. The aspect ratios were calculated based on dimensions of the plate.
   - Using the bounding box of the contour, the character from the original image was cropped out.
 
 #### 3. Character Recognition
