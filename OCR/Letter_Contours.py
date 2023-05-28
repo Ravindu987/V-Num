@@ -21,7 +21,7 @@ def sort_contours(contours):
         contours_boxes[i].append(i)
 
     c = np.array(contours_boxes)
-    if len(c[:] > 0):
+    if len(c) > 0:
         max_height = np.max(c[:, 3])
 
         # Sort the contours by y-value
@@ -84,7 +84,6 @@ def filter_contours_without_overlap(contours, hierarchy, img):
             elif y > height * 0.6:
                 continue
             else:
-                print(h / height, w / width)
                 # filtered_contours.append(contours[i])
                 indexes.append(i)
         else:
@@ -95,12 +94,11 @@ def filter_contours_without_overlap(contours, hierarchy, img):
                 or w / width > 0.4
             ):
                 continue
-            elif h / height < 0.325 and w / width < 0.325:
+            elif h / height < 0.3 and w / width < 0.3:
                 continue
             elif y > height * 0.7:
                 continue
             else:
-                print(h / height, w / width)
                 # filtered_contours.append(contours[i])
                 indexes.append(i)
 
@@ -122,13 +120,13 @@ def find_contours(img, path):
     gray = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
     # ret, thresh = cv.threshold(gray, 100, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
     # thresh = cv.adaptiveThreshold(gray,255,cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY,15,4)
-    noise_reduced = cv.fastNlMeansDenoising(gray, None, h=7, searchWindowSize=31)
     thresh = cv.adaptiveThreshold(
-        noise_reduced, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 25, 2
+        gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 21, 3
     )
+    noise_reduced = cv.fastNlMeansDenoising(thresh, None, h=7, searchWindowSize=31)
 
     erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    eroded = cv.erode(thresh, erode_kernel)
+    eroded = cv.erode(noise_reduced, erode_kernel)
 
     dilate_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7, 7))
     dilated = cv.dilate(eroded, dilate_kernel)
@@ -158,7 +156,7 @@ def find_contours(img, path):
     # cv.waitKey(0)
     # cv.destroyAllWindows()
 
-    save_contours(sorted_contours, img.shape, path, img)
+    save_contours(sorted_contours, img.shape, path, noise_reduced)
 
 
 # Save detected character as jpg
@@ -171,7 +169,7 @@ def save_contours(contours, img_size, path, img):
         roi_image = img[y - 3 : y + h + 3, x - 3 : x + w + 3]
         roi_image = cv.resize(roi_image, dsize=(128, 128), interpolation=cv.INTER_CUBIC)
         cv.imwrite(
-            "./Cropped Letters/Video 18/v18_" + prefix + "_" + str(i) + ".jpg",
+            "./Cropped Letters/Video 20_b/v_20_" + prefix + "_" + str(i) + ".jpg",
             roi_image,
         )
         i += 1
@@ -197,7 +195,7 @@ if __name__ == "__main__":
     sr.readModel(path)
     sr.setModel("edsr", 2)
 
-    src_path = "./Cropped License Plates/Video 18/"
+    src_path = "./Cropped License Plates/Video 20/"
     image_list = os.listdir(src_path)
 
     for image_path in image_list:

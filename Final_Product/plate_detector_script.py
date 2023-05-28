@@ -44,9 +44,17 @@ def show_plate_video(frame, dnn, name_counter):
     boxes = localize(frame, dnn)
     if len(boxes) > 0:
         for box in boxes:
+            print(box[0])
             x, y, w, h = box[0]
             confidence = str(box[1])
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 255), 2)
+            if y > 2 and x > 3:
+                roi = frame[y - 2 : y + h + 2, x - 3 : x + w + 3]
+            else:
+                roi = frame[y : y + h, x : x + w]
+            rand = "detect" + str(name_counter)
+            print(x, y, w, h)
+            cv2.imwrite("./Final_Product/cropped_plates/" + rand + ".jpg", roi)
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 255), 1)
             cv2.putText(
                 frame,
                 "license plate " + confidence,
@@ -56,10 +64,6 @@ def show_plate_video(frame, dnn, name_counter):
                 (255, 255, 255),
                 1,
             )
-            roi = frame[y - 2 : y + h + 2, x - 3 : x + w + 3]
-            rand = "detect" + str(name_counter)
-            print(x, y, w, h)
-            cv2.imwrite("./Final_Product/cropped_plates/" + rand + ".jpg", roi)
         return True
     return False
 
@@ -68,7 +72,7 @@ def show_plate_video(frame, dnn, name_counter):
 def run_default(cap, name_counter):
     # Set counters
     i = 0
-    j = 201
+    j = 151
 
     while True:
         # Capture frame-by-frame
@@ -76,7 +80,7 @@ def run_default(cap, name_counter):
         frame = cv2.resize(frame, (1080, 720))
 
         # Run detection algorithm once evry 10 frames,
-        if i % 10 == 0 and j > 200:
+        if i % 10 == 0 and j > 150:
             h, w, c = frame.shape
             if show_plate_video(frame[h // 2 :, :, :], dnn, name_counter):
                 print(i, j)
@@ -111,7 +115,7 @@ if __name__ == "__main__":
     # cap = cv2.VideoCapture(
     #     "./DataSet/Videos/KIC-1_Lane-04_1_20211213183000_20211213190000.avi")
 
-    cap = cv2.VideoCapture("./DataSet/Videos/Video 20.avi")
+    cap = cv2.VideoCapture("./DataSet/Videos/Video 18.avi")
 
     # show_on_video()
     run_default(cap, name_counter)

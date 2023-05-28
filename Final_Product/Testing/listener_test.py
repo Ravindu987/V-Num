@@ -7,9 +7,42 @@ from watchdog.observers import Observer
 from keras.losses import SparseCategoricalCrossentropy
 import os
 
-VIDEO_NUMBER = 18
-model_path = "./Character Recognition Weights/model_on_target_data_2.hdf5"
-folder_path = f"./Cropped License Plates/Video {VIDEO_NUMBER}/"
+
+def skew_correction(gray):
+    edges = cv.Canny(gray, 50, 150)
+
+    lines = []
+    # Apply the probabilistic Hough Line Transform to detect lines in the edge image
+    lines = cv.HoughLinesP(
+        edges, rho=1, theta=np.pi / 180, threshold=100, minLineLength=100, maxLineGap=10
+    )
+
+    # Find the longest line
+    longest_line_length = 0
+    longest_line_angle = 0
+
+    if not (lines is None):
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            line_length = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+            if line_length > longest_line_length:
+                longest_line_length = line_length
+                longest_line_angle = np.arctan2(y2 - y1, x2 - x1) * 180 / np.pi
+
+    (h, w) = gray.shape[:2]
+    center = (w // 2, h // 2)
+    rotation_matrix = cv.getRotationMatrix2D(center, longest_line_angle, 1.0)
+    rotated_image = cv.warpAffine(gray, rotation_matrix, (w, h))
+    return rotated_image, longest_line_angle
+
+
+def rotate_image(img, angle):
+    (h, w) = img.shape[:2]
+    center = (w // 2, h // 2)
+    rotation_matrix = cv.getRotationMatrix2D(center, angle, 1.0)
+    rotated_image = cv.warpAffine(img, rotation_matrix, (w, h))
+    return rotated_image
 
 
 # Write text to file
@@ -34,25 +67,28 @@ def sort_contours(contours):
         contours_boxes[i].append(i)
 
     c = np.array(contours_boxes)
-    max_height = np.max(c[:, 3])
+    if len(c) > 0:
+        max_height = np.max(c[:, 3])
 
-    # Sort the contours by y-value
-    by_y = sorted(contours_boxes, key=lambda x: x[1])  # y values
+        # Sort the contours by y-value
+        by_y = sorted(contours_boxes, key=lambda x: x[1])  # y values
 
-    line_y = by_y[0][1]  # first y
-    line = 1
-    by_line = []
+        line_y = by_y[0][1]  # first y
+        line = 1
+        by_line = []
 
-    # Assign a line number to each contour
-    for x, y, w, h, i in by_y:
-        if y > line_y + 2 * max_height / 3:
-            line_y = y
-            line += 1
+        # Assign a line number to each contour
+        for x, y, w, h, i in by_y:
+            if y > line_y + 2 * max_height / 3:
+                line_y = y
+                line += 1
 
-        by_line.append((line, x, y, w, h, i))
+            by_line.append((line, x, y, w, h, i))
 
-    # This will now sort automatically by line then by x
-    return [i for line, x, y, w, h, i in sorted(by_line)]
+        # This will now sort automatically by line then by x
+        return [i for line, x, y, w, h, i in sorted(by_line)]
+    else:
+        return []
 
 
 # Filter contours with size ratio to drop too small and too large contours and
@@ -72,7 +108,7 @@ def filter_contours_without_overlap(contours, hierarchy, img):
                 or w / width > 0.15
             ):
                 continue
-            elif h / height < 0.325 and w / width < 0.325:
+            elif h / height < 0.3 and w / width < 0.3:
                 continue
             elif y > height * 0.6:
                 continue
@@ -87,7 +123,7 @@ def filter_contours_without_overlap(contours, hierarchy, img):
                 or w / width > 0.4
             ):
                 continue
-            elif h / height < 0.325 and w / width < 0.325:
+            elif h / height < 0.3 and w / width < 0.3:
                 continue
             elif y > height * 0.7:
                 continue
@@ -113,36 +149,55 @@ def get_letters(img):
     gray = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
     # ret, thresh = cv.threshold(gray, 100, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
     # thresh = cv.adaptiveThreshold(gray,255,cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY,15,4)
-    noise_reduced = cv.fastNlMeansDenoising(gray, None, h=7, searchWindowSize=31)
+    rotated, angle = skew_correction(gray)
+
     thresh = cv.adaptiveThreshold(
-        noise_reduced, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 25, 2
+        rotated, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 21, 3
     )
+    noise_reduced = cv.fastNlMeansDenoising(thresh, None, h=7, searchWindowSize=31)
+    # cv.imshow("Noise reduced", noise_reduced)
+    # cv.waitKey(0)
+    # erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    # eroded = cv.erode(noise_reduced, erode_kernel)
 
-    erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    eroded = cv.erode(thresh, erode_kernel)
+    # # cv.imshow("Eroded", eroded)
+    # # cv.waitKey(0)
 
-    dilate_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7, 7))
-    dilated = cv.dilate(eroded, dilate_kernel)
+    # dilate_kernel = cv.getStructuringElement(cv.MORPH_RECT, (7, 7))
+    # dilated = cv.dilate(eroded, dilate_kernel)
+    # # cv.imshow("dilated", dilated)
+    # # cv.waitKey(0)
+    # eroded2 = cv.erode(dilated, erode_kernel)
 
     try:
         contours, hierarchy = cv.findContours(
-            dilated, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
+            noise_reduced, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
         )
     except:
         ret_img, contours, hierarchy = cv.findContours(
-            thresh, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
+            noise_reduced, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
         )
 
     sorted_contours = filter_contours_without_overlap(contours, hierarchy, img)
 
+    img = rotate_image(img, angle)
+    blank = np.zeros((img.shape[0], img.shape[1], 3))
+    # Return all detected letters
+
     letter_contours = []
 
     for contour in sorted_contours:
+        cv.drawContours(blank, contour, -1, (0, 255, 0), 1)
         x, y, w, h = cv.boundingRect(contour)
-        roi_image = img[y - 3 : y + h + 3, x - 3 : x + w + 3]
+        if y >= 3 and x >= 3 and y + h < img.shape[0] and x + w < img.shape[1]:
+            roi_image = img[y - 3 : y + h + 3, x - 3 : x + w + 3]
+        else:
+            roi_image = img[y : y + h, x : x + w]
         roi_image = cv.resize(roi_image, dsize=(128, 128), interpolation=cv.INTER_CUBIC)
         letter_contours.append(roi_image)
 
+    # cv.imshow("Co", blank)
+    # cv.waitKey(0)
     return letter_contours
 
 
@@ -152,6 +207,7 @@ def get_prediction(img):
     img_array = tf.expand_dims(img_array, 0)
     pred = ocr_model.predict(img_array)
     ind = np.argmax(pred[0])
+    print(pred[0][ind])
     if pred[0][ind] >= 0.6:
         return ind
     else:
@@ -169,31 +225,36 @@ def plate_read(img_path):
 
     for im in letters:
         ind = get_prediction(im)
-        if ind != -1:
+        if not ind == -1:
             id += classes[ind]
 
-    if len(id) == 0:
-        return
+    length = len(id)
 
-    if len(id) == 6:
-        id = id[:2].replace("0", "O") + id[2:]
-        id = id[:2].replace("1", "I") + id[2:]
-    elif len(id) == 7:
-        id = id[:3].replace("0", "O") + id[3:]
-        id = id[:3].replace("1", "I") + id[3:]
+    if length > 0:
+        if length == 6:
+            id = id[:2].replace("0", "O") + id[2:]
+            id = id[:2].replace("1", "I") + id[2:]
+            id = id[:2].replace("8", "B") + id[2:]
+        elif length == 7:
+            id = id[:3].replace("0", "O") + id[3:]
+            id = id[:3].replace("1", "I") + id[3:]
+            id = id[:3].replace("8", "B") + id[3:]
 
-    if id[-1] in LETTERS:
-        id = id[:-1]
+        if id[-1] in LETTERS:
+            id = id[:-1]
 
-    if len(id) > 1:
-        if id[0] in DIGITS and id[1] in LETTERS:
-            id = id[1:]
+        if length > 1:
+            try:
+                if id[1] in LETTERS and id[0] in DIGITS:
+                    id = id[1:]
+            except:
+                id = id
 
     print(id)
 
     WriteToFile(
-        f"./Final_Product/Testing/Test_Plates_{VIDEO_NUMBER}.txt",
-        f"./Final_Product/Testing/Test_Plates_Only_{VIDEO_NUMBER}.txt",
+        "./Final_Product/Testing/Plates.txt",
+        "./Final_Product/Testing/Plates_Only.txt",
         img_path,
         id,
     )
@@ -206,14 +267,8 @@ def numerical_sort_key(file_name):
     return int(numeric_part)
 
 
-# Listener class
-class MonitorFolder(PatternMatchingEventHandler):
-    def on_created(self, event):
-        plate_read(event.src_path)
-
-
 if __name__ == "__main__":
-    folder_path = f"./Cropped License Plates/Video {VIDEO_NUMBER}/"
+    folder_path = "./Final_Product/cropped_plates"
     classes = [
         "0",
         "1",
@@ -295,7 +350,9 @@ if __name__ == "__main__":
         "9",
     ]
 
-    ocr_model = tf.keras.models.load_model(model_path, compile=False)
+    ocr_model = tf.keras.models.load_model(
+        "./Character Recognition Weights/model_on_target_data_8.hdf5", compile=False
+    )
 
     ocr_model.compile(
         optimizer="adam",
@@ -308,6 +365,9 @@ if __name__ == "__main__":
     path = "./OCR/EDSR_x3.pb"
     sr.readModel(path)
     sr.setModel("edsr", 3)
+
+    VIDEO_NUMBER = 19
+    folder_path = f"./Cropped License Plates/Video {VIDEO_NUMBER}/"
 
     img_list = [f for f in os.listdir(folder_path) if f.endswith(".jpg")]
     img_list.sort(key=numerical_sort_key)

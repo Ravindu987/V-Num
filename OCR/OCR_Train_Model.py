@@ -1,7 +1,8 @@
 import tensorflow as tf
-from keras.layers import Conv2D, Dense, MaxPooling2D, Flatten, Rescaling
+from keras.layers import Conv2D, Dense, MaxPooling2D, Flatten, Rescaling, Dropout
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.losses import SparseCategoricalCrossentropy
+from keras import regularizers
 
 
 # Load data from train and test sets
@@ -30,30 +31,34 @@ num_classes = len(class_names)
 model = tf.keras.Sequential(
     [
         Rescaling(1.0 / 255),
-        Conv2D(32, 5, activation="relu"),
+        Conv2D(32, 5, activation="relu", kernel_regularizer=regularizers.l2(0.001)),
         MaxPooling2D(pool_size=2, strides=2),
-        Conv2D(64, 5, activation="relu"),
+        Conv2D(64, 5, activation="relu", kernel_regularizer=regularizers.l2(0.001)),
         MaxPooling2D(pool_size=2, strides=2),
-        Conv2D(128, 5, activation="relu"),
+        Dropout(0.2),
+        Conv2D(128, 5, activation="relu", kernel_regularizer=regularizers.l2(0.001)),
         MaxPooling2D(pool_size=2, strides=2),
-        Conv2D(256, 5, activation="relu"),
-        MaxPooling2D(pool_size=2, strides=2),
+        # Conv2D(256, 5, activation="relu", kernel_regularizer=regularizers.l2(0.001)),
+        # MaxPooling2D(pool_size=2, strides=2),
         Flatten(),
         Dense(256, activation="relu"),
+        Dropout(0.2),
         Dense(100, activation="relu"),
         Dense(num_classes, activation="softmax"),
     ]
 )
 
-checkpoint_path = "./Character Recognition Weights/model_on_target_data_4.hdf5"
+checkpoint_path = "./Character Recognition Weights/model_on_target_data_8.hdf5"
 checkpoint = ModelCheckpoint(
     filepath=checkpoint_path,
     save_best_only=True,
-    monitor="val_loss",
+    monitor="val_accuracy",
     verbose=1,
 )
 
-early_stopping = EarlyStopping(monitor="val_loss", patience=2, verbose=1)
+early_stopping = EarlyStopping(
+    monitor="val_accuracy", patience=10, verbose=1, mode="max"
+)
 
 
 model.compile(
@@ -64,5 +69,5 @@ model.compile(
 
 
 model.fit(
-    train_ds, validation_data=val_ds, epochs=15, callbacks=[checkpoint, early_stopping]
+    train_ds, validation_data=val_ds, epochs=20, callbacks=[checkpoint, early_stopping]
 )
