@@ -156,26 +156,26 @@ def get_letters(img):
     noise_reduced = cv.fastNlMeansDenoising(thresh, None, h=7, searchWindowSize=31)
     # cv.imshow("Noise reduced", noise_reduced)
     # cv.waitKey(0)
-    erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    eroded = cv.erode(noise_reduced, erode_kernel)
+    # erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    # eroded = cv.erode(noise_reduced, erode_kernel)
 
-    # cv.imshow("Eroded", eroded)
-    # cv.waitKey(0)
+    # # cv.imshow("Eroded", eroded)
+    # # cv.waitKey(0)
 
-    dilate_kernel = cv.getStructuringElement(cv.MORPH_RECT, (7, 7))
-    dilated = cv.dilate(eroded, dilate_kernel)
-    # cv.imshow("dilated", dilated)
-    # cv.waitKey(0)
+    # dilate_kernel = cv.getStructuringElement(cv.MORPH_RECT, (7, 7))
+    # dilated = cv.dilate(eroded, dilate_kernel)
+    # # cv.imshow("dilated", dilated)
+    # # cv.waitKey(0)
 
-    eroded2 = cv.erode(dilated, erode_kernel)
+    # eroded2 = cv.erode(dilated, erode_kernel)
 
     try:
         contours, hierarchy = cv.findContours(
-            eroded2, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
+            noise_reduced, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
         )
     except:
         ret_img, contours, hierarchy = cv.findContours(
-            eroded2, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
+            noise_reduced, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
         )
 
     sorted_contours = filter_contours_without_overlap(contours, hierarchy, img)

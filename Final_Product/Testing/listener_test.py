@@ -51,13 +51,13 @@ def WriteToFile(filename1, filename2, imgpath, id):
     file2 = open(filename2, "a+")
     file1.seek(0)
     file2.seek(0)
-    last_entry = ""
-    lines = file2.readlines()
-    if len(lines) != 0:
-        last_entry = lines[-1]
-    if id not in last_entry:
-        file1.write(imgpath + " : " + id + "\n")
-        file2.write(id + "\n")
+    # last_entry = ""
+    # lines = file2.readlines()
+    # if len(lines) != 0:
+    #     last_entry = lines[-1]
+    # if id not in last_entry:
+    file1.write(imgpath + " : " + id + "\n")
+    file2.write(id + "\n")
 
 
 def sort_contours(contours):
@@ -163,19 +163,19 @@ def get_letters(img):
     # # cv.imshow("Eroded", eroded)
     # # cv.waitKey(0)
 
-    # dilate_kernel = cv.getStructuringElement(cv.MORPH_RECT, (7, 7))
-    # dilated = cv.dilate(eroded, dilate_kernel)
+    dilate_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    dilated = cv.dilate(noise_reduced, dilate_kernel)
     # # cv.imshow("dilated", dilated)
     # # cv.waitKey(0)
     # eroded2 = cv.erode(dilated, erode_kernel)
 
     try:
         contours, hierarchy = cv.findContours(
-            noise_reduced, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
+            dilated, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
         )
     except:
         ret_img, contours, hierarchy = cv.findContours(
-            noise_reduced, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
+            dilated, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
         )
 
     sorted_contours = filter_contours_without_overlap(contours, hierarchy, img)
@@ -351,7 +351,7 @@ if __name__ == "__main__":
     ]
 
     ocr_model = tf.keras.models.load_model(
-        "./Character Recognition Weights/model_on_target_data_8.hdf5", compile=False
+        "./Character Recognition Weights/model_on_new_data_1.hdf5", compile=False
     )
 
     ocr_model.compile(
@@ -366,7 +366,7 @@ if __name__ == "__main__":
     sr.readModel(path)
     sr.setModel("edsr", 3)
 
-    VIDEO_NUMBER = 19
+    VIDEO_NUMBER = 46
     folder_path = f"./Cropped License Plates/Video {VIDEO_NUMBER}/"
 
     img_list = [f for f in os.listdir(folder_path) if f.endswith(".jpg")]

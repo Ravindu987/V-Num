@@ -78,34 +78,34 @@ def get_characters(img):
     cv.imshow("Noise reduced", noise)
     cv.waitKey(0)
 
-    erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    eroded = cv.erode(noise, erode_kernel)
+    # erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    # eroded = cv.erode(noise, erode_kernel)
 
-    cv.imshow("Eroded", eroded)
-    cv.waitKey(0)
+    # cv.imshow("Eroded", eroded)
+    # cv.waitKey(0)
 
-    dilate_kernel = cv.getStructuringElement(cv.MORPH_RECT, (7, 7))
-    dilated = cv.dilate(eroded, dilate_kernel)
+    dilate_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    dilated = cv.dilate(noise, dilate_kernel)
 
     cv.imshow("Dilated", dilated)
     cv.waitKey(0)
 
-    eroded2 = cv.erode(dilated, erode_kernel)
+    # eroded2 = cv.erode(dilated, erode_kernel)
 
     # kernel = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
     # dilated = cv.morphologyEx(noise, cv.MORPH_CLOSE, kernel)
 
-    cv.imshow("Eroded", eroded2)
-    cv.waitKey(0)
+    # cv.imshow("Eroded", eroded2)
+    # cv.waitKey(0)
 
     # find contours of regions of interest within license plate
     try:
         contours, hierarchy = cv.findContours(
-            eroded2, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
+            dilated, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
         )
     except:
         ret_img, contours, hierarchy = cv.findContours(
-            eroded2, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
+            dilated, cv.RETR_TREE, cv.CHAIN_APPROX_NONE
         )
 
     sorted_contours = filter_contours_without_overlap(contours, hierarchy, img)
@@ -228,7 +228,7 @@ path = "./OCR/EDSR_x3.pb"
 sr.readModel(path)
 sr.setModel("edsr", 3)
 
-img = cv.imread("./Final_Product/cropped_plates/detect17.jpg")
+img = cv.imread("./Final_Product/cropped_plates/detect199.jpg")
 # img = cv.imread("./Cropped License Plates/Video 19/detect60.jpg")
 cv.imshow("Original", img)
 upsampled = sr.upsample(img)

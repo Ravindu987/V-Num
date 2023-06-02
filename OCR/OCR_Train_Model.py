@@ -7,15 +7,26 @@ from keras import regularizers
 
 # Load data from train and test sets
 def load_data(data_path):
+    seed = 123
+    data_directory = data_path + "NEW/train/"
+    val_split = 0.2
+
     train_ds = tf.keras.utils.image_dataset_from_directory(
-        directory=data_path + "train",
+        directory=data_directory,
+        validation_split=val_split,
+        subset="training",
         image_size=(128, 128),
-        seed=123,
+        seed=seed,
         batch_size=16,
     )
 
     val_ds = tf.keras.utils.image_dataset_from_directory(
-        directory=data_path + "val", image_size=(128, 128), seed=123, batch_size=16
+        directory=data_directory,
+        validation_split=val_split,
+        subset="validation",
+        image_size=(128, 128),
+        seed=seed,
+        batch_size=16,
     )
 
     return train_ds, val_ds
@@ -48,7 +59,7 @@ model = tf.keras.Sequential(
     ]
 )
 
-checkpoint_path = "./Character Recognition Weights/model_on_target_data_8.hdf5"
+checkpoint_path = "./Character Recognition Weights/model_on_new_data_1.hdf5"
 checkpoint = ModelCheckpoint(
     filepath=checkpoint_path,
     save_best_only=True,

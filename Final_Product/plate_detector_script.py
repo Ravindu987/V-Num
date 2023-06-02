@@ -1,4 +1,5 @@
 import cv2
+import os
 
 
 # Localize plate in given video frame
@@ -40,7 +41,7 @@ def localize(frame, dnn):
 
 
 # Predict bounding box and save to storage
-def show_plate_video(frame, dnn, name_counter):
+def show_plate_video(frame, dnn, name_counter, vid):
     boxes = localize(frame, dnn)
     if len(boxes) > 0:
         for box in boxes:
@@ -53,7 +54,7 @@ def show_plate_video(frame, dnn, name_counter):
                 roi = frame[y : y + h, x : x + w]
             rand = "detect" + str(name_counter)
             print(x, y, w, h)
-            cv2.imwrite("./Final_Product/cropped_plates/" + rand + ".jpg", roi)
+            cv2.imwrite(f"./Final_Product/Video {vid}/" + rand + ".jpg", roi)
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 255), 1)
             cv2.putText(
                 frame,
@@ -69,7 +70,7 @@ def show_plate_video(frame, dnn, name_counter):
 
 
 # Default settings for plate detection
-def run_default(cap, name_counter):
+def run_default(cap, name_counter, vid):
     # Set counters
     i = 0
     j = 151
@@ -77,12 +78,15 @@ def run_default(cap, name_counter):
     while True:
         # Capture frame-by-frame
         ret, frame = cap.read()
-        frame = cv2.resize(frame, (1080, 720))
+        if frame is None:
+            break
+        else:
+            frame = cv2.resize(frame, (1080, 720))
 
         # Run detection algorithm once evry 10 frames,
         if i % 10 == 0 and j > 150:
             h, w, c = frame.shape
-            if show_plate_video(frame[h // 2 :, :, :], dnn, name_counter):
+            if show_plate_video(frame[h // 2 :, :, :], dnn, name_counter, vid):
                 print(i, j)
                 j = 1
                 name_counter += 1
@@ -115,7 +119,9 @@ if __name__ == "__main__":
     # cap = cv2.VideoCapture(
     #     "./DataSet/Videos/KIC-1_Lane-04_1_20211213183000_20211213190000.avi")
 
-    cap = cv2.VideoCapture("./DataSet/Videos/Video 18.avi")
+    for i in range(1, 2):
+        cap = cv2.VideoCapture(f"./DataSet/Videos/Video {i}.avi")
 
-    # show_on_video()
-    run_default(cap, name_counter)
+        # show_on_video()
+        os.mkdir(f"./Final_Product/Video {i}")
+        run_default(cap, name_counter, i)

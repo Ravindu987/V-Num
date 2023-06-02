@@ -73,7 +73,7 @@ def filter_contours_without_overlap(contours, hierarchy, img):
         height, width, channels = img.shape
         if width / height > 2:
             if (
-                h / height < 0.3
+                h / height < 0.2
                 or w / width < 0.05
                 or h / height > 0.8
                 or w / width > 0.15
@@ -116,7 +116,7 @@ def filter_contours_without_overlap(contours, hierarchy, img):
 
 
 # Preprocess image and find contours
-def find_contours(img, path):
+def find_contours(img, path, vid):
     gray = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
     # ret, thresh = cv.threshold(gray, 100, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
     # thresh = cv.adaptiveThreshold(gray,255,cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY,15,4)
@@ -125,11 +125,11 @@ def find_contours(img, path):
     )
     noise_reduced = cv.fastNlMeansDenoising(thresh, None, h=7, searchWindowSize=31)
 
-    erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
-    eroded = cv.erode(noise_reduced, erode_kernel)
+    # erode_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    # eroded = cv.erode(noise_reduced, erode_kernel)
 
-    dilate_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7, 7))
-    dilated = cv.dilate(eroded, dilate_kernel)
+    dilate_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3))
+    dilated = cv.dilate(noise_reduced, dilate_kernel)
 
     try:
         contours, hierarchy = cv.findContours(
@@ -149,27 +149,36 @@ def find_contours(img, path):
     # cv.waitKey(0)
     # cv.destroyAllWindows()
 
-    # blank = np.zeros((img.shape[0],img.shape[1],3))
-    # for contour in sorted_contours:
-    #     cv.drawContours(blank,contour, -1, (255,0,0),1)
+    # blank = np.zeros((img.shape[0], img.shape[1], 3))
+    # for contour in contours:
+    #     cv.drawContours(blank, contour, -1, (255, 0, 0), 1)
     # cv.imshow("All contours", blank)
     # cv.waitKey(0)
     # cv.destroyAllWindows()
 
-    save_contours(sorted_contours, img.shape, path, noise_reduced)
+    save_contours(sorted_contours, img.shape, path, img, vid)
 
 
 # Save detected character as jpg
-def save_contours(contours, img_size, path, img):
+def save_contours(contours, img_size, path, img, vid):
     i = 1
     prefix = path.split("/")[-1].split(".")[0][6:]
-    print(prefix)
+    # print(prefix)
     for contour in contours:
         x, y, w, h = cv.boundingRect(contour)
-        roi_image = img[y - 3 : y + h + 3, x - 3 : x + w + 3]
+        if y >= 3 and x >= 3 and y + h < img.shape[0] and x + w < img.shape[1]:
+            roi_image = img[y - 3 : y + h + 3, x - 3 : x + w + 3]
+        else:
+            roi_image = img[y : y + h, x : x + w]
         roi_image = cv.resize(roi_image, dsize=(128, 128), interpolation=cv.INTER_CUBIC)
+        if not os.path.exists(f"./Cropped Letters/NEW/Video {vid}"):
+            os.mkdir(f"./Cropped Letters/NEW/Video {vid}")
         cv.imwrite(
-            "./Cropped Letters/Video 20_b/v_20_" + prefix + "_" + str(i) + ".jpg",
+            f"./Cropped Letters/NEW/Video {vid}/v_{vid}_"
+            + prefix
+            + "_"
+            + str(i)
+            + ".jpg",
             roi_image,
         )
         i += 1
@@ -178,14 +187,22 @@ def save_contours(contours, img_size, path, img):
 # Upsample image
 def upscale_image(imgpath, sr):
     img = cv.imread(imgpath)
-    upsampled = sr.upsample(img)
-    return upsampled
+    if img is None:
+        return None
+    else:
+        print(img.shape)
+        if img.shape[0] != 0:
+            upsampled = sr.upsample(img)
+            return upsampled
 
 
 # Find and save contours with letters
-def find_characters(imgpath, sr):
+def find_characters(imgpath, sr, vid):
     upsampled = upscale_image(imgpath, sr)
-    find_contours(upsampled, imgpath)
+    if upsampled is None:
+        return
+    else:
+        find_contours(upsampled, imgpath, vid)
 
 
 if __name__ == "__main__":
@@ -195,12 +212,13 @@ if __name__ == "__main__":
     sr.readModel(path)
     sr.setModel("edsr", 2)
 
-    src_path = "./Cropped License Plates/Video 20/"
-    image_list = os.listdir(src_path)
+    for i in range(1, 2):
+        src_path = f"./Cropped License Plates/From Photos/"
+        image_list = os.listdir(src_path)
 
-    for image_path in image_list:
-        image_path = os.path.join(src_path, image_path)
-        find_characters(image_path, sr)
+        for image_path in image_list:
+            image_path = os.path.join(src_path, image_path)
+            find_characters(image_path, sr, 0)
         # upscaled = upscale_image("./Cropped_New/"+image_path, sr)
 
     # image_path = "detected106.jpg"
