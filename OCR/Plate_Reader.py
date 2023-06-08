@@ -213,7 +213,7 @@ DIGITS = [
 ]
 
 ocr_model = tf.keras.models.load_model(
-    "./Character Recognition Weights/model_on_target_data_7.hdf5", compile=False
+    "./Character Recognition Weights/model_on_new_data_7.hdf5", compile=False
 )
 
 ocr_model.compile(
@@ -228,8 +228,8 @@ path = "./OCR/EDSR_x3.pb"
 sr.readModel(path)
 sr.setModel("edsr", 3)
 
-img = cv.imread("./Final_Product/cropped_plates/detect199.jpg")
-# img = cv.imread("./Cropped License Plates/Video 19/detect60.jpg")
+# img = cv.imread("./Final_Product/cropped_plates/detect199.jpg")
+img = cv.imread("./Cropped License Plates/Video 19/detect52.jpg")
 cv.imshow("Original", img)
 upsampled = sr.upsample(img)
 cv.imshow("Plate-Upsampled", upsampled)

@@ -351,7 +351,7 @@ if __name__ == "__main__":
     ]
 
     ocr_model = tf.keras.models.load_model(
-        "./Character Recognition Weights/model_on_new_data_1.hdf5", compile=False
+        "./Character Recognition Weights/model_on_new_data_7.hdf5", compile=False
     )
 
     ocr_model.compile(
@@ -366,7 +366,7 @@ if __name__ == "__main__":
     sr.readModel(path)
     sr.setModel("edsr", 3)
 
-    VIDEO_NUMBER = 46
+    VIDEO_NUMBER = 19
     folder_path = f"./Cropped License Plates/Video {VIDEO_NUMBER}/"
 
     img_list = [f for f in os.listdir(folder_path) if f.endswith(".jpg")]

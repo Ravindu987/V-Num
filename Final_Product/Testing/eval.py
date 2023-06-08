@@ -19,7 +19,7 @@ def eval(correct_ids, actual_ids):
     return correct / len(correct_ids) * 100
 
 
-VIDEO_NUMBER = 22
+VIDEO_NUMBER = 19
 if __name__ == "__main__":
     correct_path = f"./Final_Product/Testing/Correct_Plates_{VIDEO_NUMBER}.txt"
     correct_ids = read_correct(correct_path)

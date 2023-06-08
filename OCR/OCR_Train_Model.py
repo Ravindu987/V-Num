@@ -9,7 +9,7 @@ from keras import regularizers
 def load_data(data_path):
     seed = 123
     data_directory = data_path + "NEW/train/"
-    val_split = 0.2
+    val_split = 0.25
 
     train_ds = tf.keras.utils.image_dataset_from_directory(
         directory=data_directory,
@@ -59,7 +59,7 @@ model = tf.keras.Sequential(
     ]
 )
 
-checkpoint_path = "./Character Recognition Weights/model_on_new_data_1.hdf5"
+checkpoint_path = "./Character Recognition Weights/model_on_new_data_7.hdf5"
 checkpoint = ModelCheckpoint(
     filepath=checkpoint_path,
     save_best_only=True,
@@ -68,7 +68,7 @@ checkpoint = ModelCheckpoint(
 )
 
 early_stopping = EarlyStopping(
-    monitor="val_accuracy", patience=10, verbose=1, mode="max"
+    monitor="val_accuracy", patience=5, verbose=1, mode="max"
 )
 
 
