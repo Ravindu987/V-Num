@@ -165,6 +165,8 @@ def get_letters(img):
 
     dilate_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
     dilated = cv.dilate(noise_reduced, dilate_kernel)
+    # dilated = cv.morphologyEx(noise_reduced, cv.MORPH_OPEN, dilate_kernel)
+
     # # cv.imshow("dilated", dilated)
     # # cv.waitKey(0)
     # eroded2 = cv.erode(dilated, erode_kernel)
@@ -351,7 +353,7 @@ if __name__ == "__main__":
     ]
 
     ocr_model = tf.keras.models.load_model(
-        "./Character Recognition Weights/model_on_new_data_7.hdf5", compile=False
+        "./Character Recognition Weights/model_on_new_data_11.hdf5", compile=False
     )
 
     ocr_model.compile(
@@ -366,11 +368,23 @@ if __name__ == "__main__":
     sr.readModel(path)
     sr.setModel("edsr", 3)
 
-    VIDEO_NUMBER = 19
-    folder_path = f"./Cropped License Plates/Video {VIDEO_NUMBER}/"
+    # VIDEO_NUMBER = 22
+    video_numbers = [19, 20, 21, 46]
+    # video_numbers = [46]
+    for VIDEO_NUMBER in video_numbers:
+        folder_path = f"./Cropped License Plates/Video {VIDEO_NUMBER}/"
 
-    img_list = [f for f in os.listdir(folder_path) if f.endswith(".jpg")]
-    img_list.sort(key=numerical_sort_key)
-    for img_name in img_list:
-        img_path = os.path.join(f"{folder_path}/", img_name)
-        plate_read(img_path)
+        img_list = [f for f in os.listdir(folder_path) if f.endswith(".jpg")]
+        img_list.sort(key=numerical_sort_key)
+        for img_name in img_list:
+            img_path = os.path.join(f"{folder_path}/", img_name)
+            plate_read(img_path)
+
+        os.rename(
+            "./Final_Product/Testing/Plates_Only.txt",
+            f"./Final_Product/Results_new11/Plates_Only_{VIDEO_NUMBER}.txt",
+        )
+        os.rename(
+            "./Final_Product/Testing/Plates.txt",
+            f"./Final_Product/Results_new11/Plates_{VIDEO_NUMBER}.txt",
+        )

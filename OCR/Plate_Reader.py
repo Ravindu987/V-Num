@@ -84,7 +84,7 @@ def get_characters(img):
     # cv.imshow("Eroded", eroded)
     # cv.waitKey(0)
 
-    dilate_kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    dilate_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3))
     dilated = cv.dilate(noise, dilate_kernel)
 
     cv.imshow("Dilated", dilated)
@@ -229,7 +229,7 @@ sr.readModel(path)
 sr.setModel("edsr", 3)
 
 # img = cv.imread("./Final_Product/cropped_plates/detect199.jpg")
-img = cv.imread("./Cropped License Plates/Video 19/detect52.jpg")
+img = cv.imread("./Cropped License Plates/Video 46/detect136.jpg")
 cv.imshow("Original", img)
 upsampled = sr.upsample(img)
 cv.imshow("Plate-Upsampled", upsampled)

@@ -59,7 +59,7 @@ model = tf.keras.Sequential(
     ]
 )
 
-checkpoint_path = "./Character Recognition Weights/model_on_new_data_7.hdf5"
+checkpoint_path = "./Character Recognition Weights/model_on_new_data_11.hdf5"
 checkpoint = ModelCheckpoint(
     filepath=checkpoint_path,
     save_best_only=True,
